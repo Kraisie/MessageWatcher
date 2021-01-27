@@ -48,7 +48,7 @@ public final class DiscordMessageUtil {
 	}
 
 	public static List<String> getStringsInQuotationMarks(final String content) {
-		final Pattern pattern = Pattern.compile("\"([^(\")]*)\"");
+		final Pattern pattern = Pattern.compile("\"[^\" ]*\"");
 		final Matcher matcher = pattern.matcher(content);
 		final List<String> domainNames = new ArrayList<>();
 		while (matcher.find()) {
