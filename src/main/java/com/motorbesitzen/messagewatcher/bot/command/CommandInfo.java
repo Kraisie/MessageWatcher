@@ -23,9 +23,9 @@ public enum CommandInfo {
 
 		@Override
 		public String getDescription() {
-			return "Adds a bad word to the database. The replacement is optional and " +
+			return "Adds a bad word to the database. A blank (\"\") replacement " +
 					"defaults to \"\\*\\*\\*\". The wildcard flag is also optional and " +
-					"defaults to false. Also supports (Java escaped) regex.";
+					"defaults to false if blank. Word supports (Java escaped) regex.";
 		}
 	}, ADD_BLACKLISTED_DOMAIN {
 		@Override

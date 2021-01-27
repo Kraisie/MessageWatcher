@@ -31,7 +31,7 @@ public class AddBadWord extends CommandImpl {
 		final Message message = event.getMessage();
 		final String content = message.getContentRaw();
 		final List<String> badWordProperties = DiscordMessageUtil.getStringsInQuotationMarks(content);
-		if (badWordProperties.size() == 0) {
+		if (badWordProperties.size() != 3) {
 			sendErrorMessage(event.getChannel(), "Please use the correct syntax of the command.");
 			return;
 		}
@@ -49,10 +49,10 @@ public class AddBadWord extends CommandImpl {
 	private void saveBadWord(final DiscordGuild dcGuild, final List<String> badWordProperties) {
 		final String word = badWordProperties.get(0);
 		final String replacement =
-				badWordProperties.size() >= 2 ?
-						badWordProperties.get(1) :
-						"\\*\\*\\*";
-		final boolean wildcard = badWordProperties.size() >= 3 && badWordProperties.get(2).equalsIgnoreCase("true");
+				badWordProperties.get(1).isBlank()?
+						"\\*\\*\\*" :
+						badWordProperties.get(1);
+		final boolean wildcard = badWordProperties.get(2).equalsIgnoreCase("true");
 
 		final BadWord badWord = new BadWord(word, replacement, wildcard, dcGuild);
 		dcGuild.addBadWord(badWord);
