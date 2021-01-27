@@ -164,10 +164,18 @@ public class Censor {
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(new Color(222, 105, 12));
 		eb.setAuthor(message.getAuthor().getName(), null, message.getAuthor().getEffectiveAvatarUrl());
-		eb.setTitle("Message censored:").setDescription(newMessage);
+		eb.setTitle("Message censored:").setDescription(getWrappedMessage(newMessage));
 		eb.setFooter("Avoid censored words/links in the future!");
 		addAttachedImages(eb, message);
 		tryCensor(channel, message, eb);
+	}
+
+	private String getWrappedMessage(final String message) {
+		if(message.length() < 1000) {
+			return message;
+		}
+
+		return message.substring(0, 999) + "...";
 	}
 
 	private void tryCensor(final TextChannel channel, final Message message, final EmbedBuilder eb) {
