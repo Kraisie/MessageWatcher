@@ -20,8 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,7 +56,7 @@ public class Censor {
 		final String originalContent = message.getContentRaw();
 		final String censoredContent = censorContent(dcGuild, dcMember, originalContent);
 
-		if (!originalContent.equalsIgnoreCase(censoredContent)) {
+		if (isMessageCensored(originalContent, censoredContent)) {
 			replaceMessage(message, censoredContent);
 		}
 
@@ -78,7 +80,7 @@ public class Censor {
 	private String censorContent(final DiscordGuild dcGuild, final DiscordMember dcMember, final String content) {
 		final String[] originalLines = content.trim().split("\n");
 		final List<String> censoredLines = new ArrayList<>();
-		for(String line : originalLines) {
+		for (String line : originalLines) {
 			censoredLines.add(censorLine(dcGuild, dcMember, line));
 		}
 
@@ -87,8 +89,8 @@ public class Censor {
 
 	private String censorLine(final DiscordGuild dcGuild, final DiscordMember dcMember, final String line) {
 		final List<String> censoredTokens = new ArrayList<>();
-		for(String token : line.split(" +")) {
-			if(isLink(token)) {
+		for (String token : line.split(" +")) {
+			if (isLink(token)) {
 				censoredTokens.add(censorLink(dcGuild, dcMember, token));
 			} else {
 				censoredTokens.add(censorWord(dcGuild, dcMember, token));
@@ -172,11 +174,17 @@ public class Censor {
 
 	private String buildString(final List<String> parts, final String filler) {
 		final StringBuilder sb = new StringBuilder();
-		for(String part : parts) {
+		for (String part : parts) {
 			sb.append(part).append(filler);
 		}
 
 		return sb.toString().trim();
+	}
+
+	private boolean isMessageCensored(final String original, final String result) {
+		final String originalNoFormat = original.replaceAll("\\s+", "");
+		final String resultNoFormat = result.replaceAll("\\s+", "");
+		return !originalNoFormat.equalsIgnoreCase(resultNoFormat);
 	}
 
 	private void replaceMessage(final Message message, final String newMessage) {
@@ -191,7 +199,7 @@ public class Censor {
 	}
 
 	private String getWrappedMessage(final String message) {
-		if(message.length() < 1000) {
+		if (message.length() < 1000) {
 			return message;
 		}
 
