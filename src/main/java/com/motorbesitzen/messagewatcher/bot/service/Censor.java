@@ -199,11 +199,11 @@ public class Censor {
 	}
 
 	private String getWrappedMessage(final String message) {
-		if (message.length() < 1000) {
+		if (message.length() <= 1950) {
 			return message;
 		}
 
-		return message.substring(0, 999) + "...";
+		return message.substring(0, 1949) + "...";
 	}
 
 	private void tryCensor(final TextChannel channel, final Message message, final EmbedBuilder eb) {

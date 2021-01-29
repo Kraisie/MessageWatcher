@@ -52,6 +52,10 @@ public class ReactionListener extends ListenerAdapter {
 			return;
 		}
 
+		if(event.getReactionEmote().isEmoji()) {
+			return;
+		}
+
 		if(event.getReactionEmote().getIdLong() != reportEmote.getIdLong()) {
 			return;
 		}
