@@ -7,19 +7,15 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.List;
 import java.util.Optional;
 
-@Service
 public class ReactionListener extends ListenerAdapter {
 
 	private final DiscordGuildRepo guildRepo;
 
-	@Autowired
 	public ReactionListener(DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
@@ -32,7 +28,7 @@ public class ReactionListener extends ListenerAdapter {
 	}
 
 	private void handleReaction(final GuildMessageReactionAddEvent event, final Message message) {
-		if(message.isWebhookMessage() || message.getAuthor().isBot()) {
+		if (message.isWebhookMessage() || message.getAuthor().isBot()) {
 			return;
 		}
 
@@ -40,27 +36,27 @@ public class ReactionListener extends ListenerAdapter {
 		final long guildId = guild.getIdLong();
 		final Optional<DiscordGuild> discordGuildOpt = guildRepo.findById(guildId);
 		final DiscordGuild dcGuild = discordGuildOpt.orElseGet(() -> createDiscordGuild(guildId));
-		if(dcGuild.getReportEmoteId() == 0 || dcGuild.getReportCountThreshold() == 0 || dcGuild.getReportChannelId() == 0) {
+		if (dcGuild.getReportEmoteId() == 0 || dcGuild.getReportCountThreshold() == 0 || dcGuild.getReportChannelId() == 0) {
 			return;
 		}
 
 		final Emote reportEmote = guild.getEmoteById(dcGuild.getReportEmoteId());
-		if(reportEmote == null || !reportEmote.isAvailable()) {
+		if (reportEmote == null || !reportEmote.isAvailable()) {
 			LogUtil.logInfo("Removing report emote on \"" + guild.getName() + "\" due to not being available!");
 			dcGuild.setReportEmoteId(0L);
 			guildRepo.save(dcGuild);
 			return;
 		}
 
-		if(event.getReactionEmote().isEmoji()) {
+		if (event.getReactionEmote().isEmoji()) {
 			return;
 		}
 
-		if(event.getReactionEmote().getIdLong() != reportEmote.getIdLong()) {
+		if (event.getReactionEmote().getIdLong() != reportEmote.getIdLong()) {
 			return;
 		}
 
-		if(isReport(dcGuild, message, reportEmote)) {
+		if (isReport(dcGuild, message, reportEmote)) {
 			sendReportMessage(message, reportEmote, dcGuild);
 		}
 	}
@@ -73,8 +69,8 @@ public class ReactionListener extends ListenerAdapter {
 
 	private boolean isReport(final DiscordGuild dcGuild, final Message message, final Emote reportEmote) {
 		final List<MessageReaction> reactions = message.getReactions();
-		for(MessageReaction reaction : reactions) {
-			if(reaction.getReactionEmote().getIdLong() == reportEmote.getIdLong()) {
+		for (MessageReaction reaction : reactions) {
+			if (reaction.getReactionEmote().getIdLong() == reportEmote.getIdLong()) {
 				return hasReachedThreshold(dcGuild, reaction);
 			}
 		}
@@ -113,7 +109,7 @@ public class ReactionListener extends ListenerAdapter {
 	}
 
 	private String getWrappedContent(final String content) {
-		if(content.length() < 1000) {
+		if (content.length() < 1000) {
 			return content;
 		}
 
@@ -122,8 +118,8 @@ public class ReactionListener extends ListenerAdapter {
 
 	private void buildEmbedCallback(final TextChannel reportChannel, final EmbedBuilder reportEmbed, final Message message, final Emote reportEmote) {
 		final List<MessageReaction> reactions = message.getReactions();
-		for(MessageReaction reaction : reactions) {
-			if(reaction.getReactionEmote().getIdLong() == reportEmote.getIdLong()) {
+		for (MessageReaction reaction : reactions) {
+			if (reaction.getReactionEmote().getIdLong() == reportEmote.getIdLong()) {
 				reaction.retrieveUsers().queue(
 						reporters -> buildEmbedCallbackReporters(reportChannel, reportEmbed, message, reporters)
 				);

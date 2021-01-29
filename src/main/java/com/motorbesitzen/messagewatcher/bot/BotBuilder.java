@@ -1,15 +1,12 @@
 package com.motorbesitzen.messagewatcher.bot;
 
-import com.motorbesitzen.messagewatcher.bot.event.DeletionListener;
-import com.motorbesitzen.messagewatcher.bot.event.GuildJoinListener;
-import com.motorbesitzen.messagewatcher.bot.event.GuildMessageListener;
-import com.motorbesitzen.messagewatcher.bot.event.ReactionListener;
 import com.motorbesitzen.messagewatcher.util.EnvironmentUtil;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -19,25 +16,18 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.LoginException;
+import java.util.Map;
 
 @Service
 public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 
 	private final ApplicationContext applicationContext;
-	private final GuildMessageListener msgListener;
-	private final GuildJoinListener joinListener;
-	private final DeletionListener deletionListener;
-	private final ReactionListener reactionListener;
+	private final Map<String, ? extends ListenerAdapter> eventListeners;
 
 	@Autowired
-	private BotBuilder(final ApplicationContext applicationContext, final GuildMessageListener msgListener,
-					   final GuildJoinListener joinListener, final DeletionListener deletionListener,
-					   final ReactionListener reactionListener) {
+	private BotBuilder(final ApplicationContext applicationContext, final Map<String, ? extends ListenerAdapter> eventListeners) {
 		this.applicationContext = applicationContext;
-		this.msgListener = msgListener;
-		this.joinListener = joinListener;
-		this.deletionListener = deletionListener;
-		this.reactionListener = reactionListener;
+		this.eventListeners = eventListeners;
 	}
 
 	/**
@@ -83,12 +73,17 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 		return discordToken;
 	}
 
-	private JDABuilder buildBot(String discordToken) {
-		Activity activity = getBotActivity();
-		return JDABuilder.createDefault(discordToken)
+	private JDABuilder buildBot(final String discordToken) {
+		final Activity activity = getBotActivity();
+		final JDABuilder builder = JDABuilder.createDefault(discordToken)
 				.setStatus(OnlineStatus.ONLINE)
-				.setActivity(activity)
-				.addEventListeners(msgListener, joinListener, reactionListener, deletionListener);
+				.setActivity(activity);
+
+		for (Map.Entry<String, ? extends ListenerAdapter> entry : eventListeners.entrySet()) {
+			builder.addEventListeners(entry.getValue());
+		}
+
+		return builder;
 	}
 
 	/**
@@ -99,9 +94,9 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @return A Discord {@code Activity} object.
 	 */
 	private Activity getBotActivity() {
-		String activityType = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY");
-		String activityText = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_TEXT");
-		String activityStreamingUrl = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_STREAMING_URL");
+		final String activityType = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY");
+		final String activityText = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_TEXT");
+		final String activityStreamingUrl = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_STREAMING_URL");
 
 		if (activityType == null || activityText == null) {
 			LogUtil.logInfo("Activity or activity text not given, ignoring activity settings.");
@@ -129,7 +124,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @param url  The URL to the stream, only needed when the {@code ActivityType} is set to 'streaming'.
 	 * @return A Discord {@code Activity} object.
 	 */
-	private Activity buildActivity(String type, String text, String url) {
+	private Activity buildActivity(final String type, final String text, final String url) {
 		switch (type.toLowerCase()) {
 			case "playing":
 				return Activity.playing(text);
@@ -152,7 +147,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @param builder The builder that is supposed to generate the JDA instance.
 	 * @return The JDA instance, the 'core' of the API/the bot.
 	 */
-	private JDA botLogin(JDABuilder builder) {
+	private JDA botLogin(final JDABuilder builder) {
 		try {
 			return builder.build();
 		} catch (LoginException e) {

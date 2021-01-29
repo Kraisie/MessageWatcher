@@ -6,18 +6,14 @@ import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Handles guild joins by the bot and adds a guild entry if needed (new guild).
  */
-@Service
 public class GuildJoinListener extends ListenerAdapter {
 
 	private final DiscordGuildRepo guildRepo;
 
-	@Autowired
 	public GuildJoinListener(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
