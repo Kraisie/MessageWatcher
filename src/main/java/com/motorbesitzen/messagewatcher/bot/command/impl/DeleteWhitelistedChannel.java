@@ -8,16 +8,20 @@ import com.motorbesitzen.messagewatcher.data.repo.WhitelistedChannelRepo;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service("delwhitelist")
 public class DeleteWhitelistedChannel extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 	private final WhitelistedChannelRepo channelRepo;
 
+	@Autowired
 	public DeleteWhitelistedChannel(final DiscordGuildRepo guildRepo, final WhitelistedChannelRepo channelRepo) {
 		this.guildRepo = guildRepo;
 		this.channelRepo = channelRepo;

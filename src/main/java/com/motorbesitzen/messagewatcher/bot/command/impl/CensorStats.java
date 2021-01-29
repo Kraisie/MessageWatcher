@@ -9,15 +9,19 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Optional;
 
+@Service("stats")
 public class CensorStats extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 
+	@Autowired
 	public CensorStats(final DiscordMemberRepo memberRepo) {
 		this.memberRepo = memberRepo;
 	}

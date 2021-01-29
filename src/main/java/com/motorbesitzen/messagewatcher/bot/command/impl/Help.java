@@ -7,12 +7,14 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Sends a help message with information about all available commands to the channel where the help was requested.
  */
+@Service("help")
 public class Help extends CommandImpl {
 
 	/**

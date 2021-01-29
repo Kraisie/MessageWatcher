@@ -8,16 +8,20 @@ import com.motorbesitzen.messagewatcher.data.repo.ModRoleRepo;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service("delmod")
 public class DeleteModRole extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 	private final ModRoleRepo roleRepo;
 
+	@Autowired
 	public DeleteModRole(final DiscordGuildRepo guildRepo, final ModRoleRepo roleRepo) {
 		this.guildRepo = guildRepo;
 		this.roleRepo = roleRepo;

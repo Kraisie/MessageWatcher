@@ -6,17 +6,20 @@ import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service("domains")
 public class ListBlacklistedDomains extends CommandImpl {
 
+	private static final int FIELDS_PER_EMBED = 25;
 	private final DiscordGuildRepo guildRepo;
 
-	private static final int FIELDS_PER_EMBED = 25;
-
+	@Autowired
 	public ListBlacklistedDomains(DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}

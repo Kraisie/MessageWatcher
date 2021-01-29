@@ -9,22 +9,26 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.List;
 
+@Service("top")
 public class TopList extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 
+	@Autowired
 	public TopList(final DiscordMemberRepo memberRepo) {
 		this.memberRepo = memberRepo;
 	}
 
 	@Override
-	public void execute(GuildMessageReceivedEvent event) {
+	public void execute(final GuildMessageReceivedEvent event) {
 		final Guild guild = event.getGuild();
 		final Message message = event.getMessage();
 		final List<DiscordMember> topMembers = getTopList(guild.getIdLong(), message.getContentRaw());

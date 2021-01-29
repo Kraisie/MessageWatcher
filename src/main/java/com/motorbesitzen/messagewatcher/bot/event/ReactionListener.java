@@ -7,16 +7,20 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class ReactionListener extends ListenerAdapter {
 
 	private final DiscordGuildRepo guildRepo;
 
-	public ReactionListener(DiscordGuildRepo guildRepo) {
+	@Autowired
+	public ReactionListener(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 

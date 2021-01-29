@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
 import net.dv8tion.jda.api.events.emote.EmoteRemovedEvent;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
@@ -18,12 +20,14 @@ import java.util.Optional;
  * Handles text channel and role deletions. If a channel or role was authorized it gets removed
  * from the list of authorized channels/roles for that guild.
  */
+@Service
 public class DeletionListener extends ListenerAdapter {
 
 	private final DiscordGuildRepo guildRepo;
 	private final ModRoleRepo roleRepo;
 	private final WhitelistedChannelRepo channelRepo;
 
+	@Autowired
 	public DeletionListener(final DiscordGuildRepo guildRepo, final ModRoleRepo roleRepo, final WhitelistedChannelRepo channelRepo) {
 		this.guildRepo = guildRepo;
 		this.roleRepo = roleRepo;

@@ -8,15 +8,19 @@ import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service("deldomain")
 public class DeleteBlacklistedDomain extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 	private final BlacklistedDomainRepo domainRepo;
 
+	@Autowired
 	public DeleteBlacklistedDomain(DiscordGuildRepo guildRepo, BlacklistedDomainRepo domainRepo) {
 		this.guildRepo = guildRepo;
 		this.domainRepo = domainRepo;

@@ -13,10 +13,13 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageUpdateEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class GuildMessageListener extends ListenerAdapter {
 
 	private final Censor censor;
@@ -24,6 +27,7 @@ public class GuildMessageListener extends ListenerAdapter {
 	private final WhitelistedChannelRepo channelRepo;
 	private final ModRoleRepo roleRepo;
 
+	@Autowired
 	public GuildMessageListener(final Censor censor, final Map<String, Command> commandMap,
 								final WhitelistedChannelRepo channelRepo, final ModRoleRepo roleRepo) {
 		this.censor = censor;

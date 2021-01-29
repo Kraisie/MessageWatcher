@@ -7,15 +7,19 @@ import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service("addmod")
 public class AddModRole extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
+	@Autowired
 	public AddModRole(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}

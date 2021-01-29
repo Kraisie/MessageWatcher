@@ -10,17 +10,21 @@ import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.Min;
 import java.util.Optional;
 import java.util.Set;
 
+@Service("info")
 public class Info extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
-	public Info(DiscordGuildRepo guildRepo) {
+	@Autowired
+	public Info(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 
