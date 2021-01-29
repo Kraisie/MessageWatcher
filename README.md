@@ -40,7 +40,7 @@ down and select all needed permissions:
 ```text
 View Channels
 Send Messages
-Manage MEssages
+Manage Messages
 Embed Links
 Attach Files
 Read Message History
@@ -63,6 +63,7 @@ do not give the bot the administrator permissions you need to keep your token ve
   with a mod role in channels the bot has access to.
 * Censors will only happen in channels the bot has access to and can send 
   messages in.
+* The censor will not censor words inside of links to prevent breaking links.  
 
 ### Environment
 

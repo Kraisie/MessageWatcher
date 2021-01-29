@@ -20,9 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,27 +75,43 @@ public class Censor {
 		return dcMember;
 	}
 
-	private String censorContent(final DiscordGuild dcGuild, final DiscordMember dcMember, final String originalContent) {
-		final String censoredContent = censorLinks(dcGuild, dcMember, originalContent);
-		return censorWords(dcGuild, dcMember, censoredContent);
+	private String censorContent(final DiscordGuild dcGuild, final DiscordMember dcMember, final String content) {
+		final String[] originalLines = content.trim().split("\n");
+		final List<String> censoredLines = new ArrayList<>();
+		for(String line : originalLines) {
+			censoredLines.add(censorLine(dcGuild, dcMember, line));
+		}
+
+		return generateLineString(censoredLines);
 	}
 
-	private String censorLinks(final DiscordGuild dcGuild, final DiscordMember dcMember, final String content) {
-		final Pattern pattern = Pattern.compile(LINK_REGEX);
-		final Matcher matcher = pattern.matcher(content);
-
-		final StringBuffer sb = new StringBuffer();
-		while (matcher.find()) {
-			final String rawLink = matcher.group();
-			final String domain = getDomainOfLink(rawLink);
-			if (isBlacklistedDomainInGuild(domain, dcGuild)) {
-				matcher.appendReplacement(sb, "<LINK CENSORED>");
-				dcMember.increaseLinkCensorCount();
+	private String censorLine(final DiscordGuild dcGuild, final DiscordMember dcMember, final String line) {
+		final List<String> censoredTokens = new ArrayList<>();
+		for(String token : line.split(" +")) {
+			if(isLink(token)) {
+				censoredTokens.add(censorLink(dcGuild, dcMember, token));
+			} else {
+				censoredTokens.add(censorWord(dcGuild, dcMember, token));
 			}
 		}
 
-		matcher.appendTail(sb);
-		return sb.toString();
+		return generateTokenString(censoredTokens);
+	}
+
+	private boolean isLink(final String token) {
+		final Pattern pattern = Pattern.compile(LINK_REGEX);
+		final Matcher matcher = pattern.matcher(token);
+		return matcher.find();
+	}
+
+	private String censorLink(final DiscordGuild dcGuild, final DiscordMember dcMember, final String link) {
+		final String domain = getDomainOfLink(link);
+		if (isBlacklistedDomainInGuild(domain, dcGuild)) {
+			dcMember.increaseLinkCensorCount();
+			return "<LINK CENSORED>";
+		}
+
+		return link;
 	}
 
 	private String getDomainOfLink(final String link) {
@@ -129,34 +144,39 @@ public class Censor {
 		return false;
 	}
 
-	private String censorWords(final DiscordGuild dcGuild, final DiscordMember dcMember, final String content) {
-		String newContent = content;
+	private String censorWord(final DiscordGuild dcGuild, final DiscordMember dcMember, final String token) {
+		String newToken = token;
 		for (BadWord badWord : dcGuild.getBadWordsOrderdByWordLength()) {
 			final Pattern pattern = badWord.isWildcard() ?
 					Pattern.compile("(?i)" + badWord.getWord()) :                            // (?i) to ignore case
 					Pattern.compile("(?i)(^|(?<=[\\p{S}\\p{P}\\p{C}\\s]))" + badWord.getWord() + "((?=[\\p{S}\\p{P}\\p{C}\\s])|$)");
 
 			String replacement = badWord.getReplacement();
-			final Matcher matcher = pattern.matcher(newContent);
-			final StringBuffer sb = new StringBuffer();
+			final Matcher matcher = pattern.matcher(token);
 			while (matcher.find()) {
-				if (matcher.group().startsWith(" ")) {
-					replacement = " " + replacement;
-				}
-
-				if (matcher.group().endsWith(" ")) {
-					replacement = replacement + " ";
-				}
-
-				matcher.appendReplacement(sb, replacement);
+				newToken = matcher.replaceAll(replacement);
 				dcMember.increaseWordCensorCount();
 			}
-
-			matcher.appendTail(sb);
-			newContent = sb.toString();
 		}
 
-		return newContent;
+		return newToken;
+	}
+
+	private String generateTokenString(final List<String> tokens) {
+		return buildString(tokens, " ");
+	}
+
+	private String generateLineString(final List<String> lines) {
+		return buildString(lines, "\n");
+	}
+
+	private String buildString(final List<String> parts, final String filler) {
+		final StringBuilder sb = new StringBuilder();
+		for(String part : parts) {
+			sb.append(part).append(filler);
+		}
+
+		return sb.toString().trim();
 	}
 
 	private void replaceMessage(final Message message, final String newMessage) {
