@@ -1,17 +1,16 @@
 # MessageWatcher
 
-This is a Discord bot which censors messages with specific words or links
-it instead of deleting them completely like other bots.
+This is a Discord bot which censors messages with specific words or links it instead of deleting them completely like
+other bots.
 
 To add a running version of this bot to your server use the following link:
 https://discord.com/api/oauth2/authorize?client_id=804052505804800050&permissions=388160&scope=bot
 
 ## Setup
 
-This section only applies if you want to host the bot yourself.
-The following text is written for linux based systems. Windows or Mac systems 
-might need slightly different setup steps. This bot runs on Java 11, so you 
-need to install the Java 11 JDK for your system.
+This section only applies if you want to host the bot yourself. The following text is written for linux based systems.
+Windows or Mac systems might need slightly different setup steps. This bot runs on Java 11, so you need to install the
+Java 11 JDK for your system.
 
 ### Tokens & APIs
 
@@ -20,14 +19,11 @@ need to install the Java 11 JDK for your system.
 To use this bot you need a Discord bot token. To create one open the
 [Discord Developer Portal](https://discord.com/developers/applications)
 and add a new application by clicking on the "New Application" button. \
-After creating the application you should see general information about 
-your application. If not please select your application in the list of 
-applications. Now switch to the "Bot" tab on the left and click the
+After creating the application you should see general information about your application. If not please select your
+application in the list of applications. Now switch to the "Bot" tab on the left and click the
 "Add Bot" button that shows up. \
-You should now see information about the bot you created, and a button 
-called "Copy" under a header that says "Token".
-Click that button to copy the token of your bot. You will need this token in 
-the [Environment section](#environment). \
+You should now see information about the bot you created, and a button called "Copy" under a header that says "Token".
+Click that button to copy the token of your bot. You will need this token in the [Environment section](#environment). \
 Never give this token to anyone as that is all one needs to control your bot!
 
 #### Adding the bot to your server
@@ -48,22 +44,21 @@ Use External Emojis
 Add Reactions
 ```
 
-Back up in the scopes section on that site there is now a link you can use to 
-add the bot to your server with the selected permissions. To use that link 
-just copy and paste it into a new browser tab or window. \
-You can give the bot the administrator permission to decrease the amount of permissions to update but keep in mind that it literally means the bot can do anything. That
-means if anyone has access to your token to control the bot he can do pretty much anything to your server. However, even
-without the administrator permission the bot has enough permissions to interfere a lot with your server so even if you
-do not give the bot the administrator permissions you need to keep your token very secure.
+Back up in the scopes section on that site there is now a link you can use to add the bot to your server with the
+selected permissions. To use that link just copy and paste it into a new browser tab or window. \
+You can give the bot the administrator permission to decrease the amount of permissions to update but keep in mind that
+it literally means the bot can do anything. That means if anyone has access to your token to control the bot he can do
+pretty much anything to your server. However, even without the administrator permission the bot has enough permissions
+to interfere a lot with your server so even if you do not give the bot the administrator permissions you need to keep
+your token very secure.
 
 #### Additional information about the bot
 
 * Not granting the bot the needed permissions might lead to unknown behaviour.
-* Commands can only be used by users with administrator permission or users 
-  with a mod role in channels the bot has access to.
-* Censors will only happen in channels the bot has access to and can send 
-  messages in.
-* The censor will not censor words inside of links to prevent breaking links.  
+* Commands can only be used by users with administrator permission or users with a mod role in channels the bot has
+  access to.
+* Censors will only happen in channels the bot has access to and can send messages in.
+* The censor will not censor words inside of links to prevent breaking links.
 
 ### Environment
 
@@ -222,7 +217,7 @@ running or restart them afterwards.
 
 ## Credits
 
-* [leThrax](https://github.com/leThrax) for the original idea to code a bot which later included this functionality and 
+* [leThrax](https://github.com/leThrax) for the original idea to code a bot which later included this functionality and
   first efforts to implement the original bot.
 * [MinnDevelopment](https://github.com/MinnDevelopment),
   [DV8FromTheWorld](https://github.com/DV8FromTheWorld) and other contributors for developing and contributing to the
@@ -245,22 +240,42 @@ the following line:
 ```dotenv
 SPRING_PROFILES_ACTIVE=dev
 ```
-If you want to use the H2 web console you need to add the following dependency 
-to the `build.gradle`:
+
+If you want to use the H2 web console you need to add the following dependency to the `build.gradle`:
+
 ```
 implementation 'org.springframework.boot:spring-boot-starter-web'
 ```
-The database creation process in the `dev` profile will try to import a file
-called `data.sql` in the `resources` folder on startup. It will crash if that 
-file is not present so either disable the auto import in `application.yml` or
-create the file yourself. The file can be used for sample data.
 
-### Adding commands
+The database creation process in the `dev` profile will try to import a file called `data.sql` in the `resources` folder
+on startup. It will crash if that file is not present so either disable the auto import in `application.yml` or create
+the file yourself. The file can be used for sample data.
 
-To add a command to the bot there are a few steps to perform. First add a new entry ot the `CommandInfo` class. The next
-step is to create the command class in `com.motorbesitzen.messagewatcher.bot.command.impl`. The command class needs to
-extend `CommandImpl`. Afterwards add a method to `CommandBeanConfig` to provide a bean of the command. All classes
-provide more information on what is needed so read them before performing any steps.
+### Adding commands and event listeners
+
+To add a command to the bot there are a few steps to perform. First add a new entry to the `CommandInfo` class. The next
+step is to create the command class in
+`com.motorbesitzen.rolewatcher.bot.command.impl`. The command class needs to extend `CommandImpl`. The command needs to
+be a `@Service` and needs to have its command set as a value in lowercase. So a command like `help` would be the
+following:
+
+```java
+
+@Service("help")
+public class Help extends CommandImpl {
+  // ...
+}
+```
+
+The same applies for event listeners although they do not need a name and thus no value:
+
+```java
+
+@Service
+public class SomeEventListener extends ListenerAdapter {
+  // ...
+}
+```
 
 ### Decisions
 
