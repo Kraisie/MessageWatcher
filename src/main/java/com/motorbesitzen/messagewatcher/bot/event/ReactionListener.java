@@ -74,6 +74,10 @@ public class ReactionListener extends ListenerAdapter {
 	private boolean isReport(final DiscordGuild dcGuild, final Message message, final Emote reportEmote) {
 		final List<MessageReaction> reactions = message.getReactions();
 		for (MessageReaction reaction : reactions) {
+			if (reaction.getReactionEmote().isEmoji()) {
+				continue;
+			}
+
 			if (reaction.getReactionEmote().getIdLong() == reportEmote.getIdLong()) {
 				return hasReachedThreshold(dcGuild, reaction);
 			}
