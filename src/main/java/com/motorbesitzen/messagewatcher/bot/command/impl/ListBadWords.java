@@ -45,7 +45,8 @@ public class ListBadWords extends CommandImpl {
 			}
 
 			final BadWord bw = badWords.get(i);
-			eb.addField("", "**\"" + bw.getWord() + "\"** ➝ \"" + bw.getReplacement() + "\" " + (bw.isWildcard() ? "(wildcard)" : ""), false);
+			eb.addField("", (bw.isPunishable() ? "[!]" : "") + "**\"" + bw.getWord() + "\"** ➝ \"" + bw.getReplacement() +
+					"\" " + (bw.isWildcard() ? "(wildcard)" : ""), false);
 		}
 
 		answer(event.getChannel(), eb.build());

@@ -27,6 +27,10 @@ public class DiscordGuild {
 	@ColumnDefault("0")
 	private long reportChannelId;
 
+	@Min(0)
+	@ColumnDefault("5")
+	private long censorKickThreshold;
+
 	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL)
 	private Set<BadWord> badWords;
 
@@ -88,6 +92,14 @@ public class DiscordGuild {
 
 	public void setReportChannelId(long reportChannelId) {
 		this.reportChannelId = reportChannelId;
+	}
+
+	public long getCensorKickThreshold() {
+		return censorKickThreshold;
+	}
+
+	public void setCensorKickThreshold(long censorKickThreshold) {
+		this.censorKickThreshold = censorKickThreshold;
 	}
 
 	public Set<BadWord> getBadWords() {

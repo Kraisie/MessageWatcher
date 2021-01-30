@@ -74,6 +74,7 @@ public class Info extends CommandImpl {
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Info for \"" + event.getGuild().getName() + "\":");
 		eb.setColor(getEmbedColor());
+		eb.addField("Censors of punishable words to kick:", String.valueOf(dcGuild.getCensorKickThreshold()), false);
 		setReportInfo(eb, event.getGuild(), dcGuild);
 		eb.addBlankField(false);
 		eb.addField("Whitelisted channels: ", channelContent, true);

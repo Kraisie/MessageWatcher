@@ -20,10 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,13 +49,21 @@ public class Censor {
 		final User author = message.getAuthor();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(author.getIdLong(), guild.getIdLong());
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createMember(author, dcGuild));
+		final long originalWarnCount = dcMember.getWarningCount();
 		dcMember.increaseMessageCount();
 
 		final String originalContent = message.getContentRaw();
 		final String censoredContent = censorContent(dcGuild, dcMember, originalContent);
 
 		if (isMessageCensored(originalContent, censoredContent)) {
-			replaceMessage(message, censoredContent);
+			final String warnMessage = originalWarnCount == dcMember.getWarningCount() ?
+					"Avoid censored words/links in the future!" :
+					"You have used a kickable word. Be aware that further usage will be punished!";
+			replaceMessage(message, censoredContent, warnMessage);
+		}
+
+		if (originalWarnCount != dcMember.getWarningCount() && dcMember.getWarningCount() >= dcGuild.getCensorKickThreshold()) {
+			kickMember(guild, dcGuild, dcMember);
 		}
 
 		memberRepo.save(dcMember);
@@ -88,22 +94,58 @@ public class Censor {
 	}
 
 	private String censorLine(final DiscordGuild dcGuild, final DiscordMember dcMember, final String line) {
-		final List<String> censoredTokens = new ArrayList<>();
-		for (String token : line.split(" +")) {
+		final Map<Integer, String> linkMap = new HashMap<>();
+		final Map<Integer, String> wordMap = new HashMap<>();
+		final String[] tokens = line.split(" +");
+
+		int pos = 0;
+		for (String token : tokens) {
 			if (isLink(token)) {
-				censoredTokens.add(censorLink(dcGuild, dcMember, token));
+				linkMap.put(pos + 1, token);
+				pos += 2;
 			} else {
-				censoredTokens.add(censorWord(dcGuild, dcMember, token));
+				addToWordMap(wordMap, pos, token);
 			}
 		}
 
-		return generateTokenString(censoredTokens);
+		for (Map.Entry<Integer, String> link : linkMap.entrySet()) {
+			link.setValue(censorLink(dcGuild, dcMember, link.getValue()));
+		}
+
+		for (Map.Entry<Integer, String> wordPart : wordMap.entrySet()) {
+			wordPart.setValue(censorWordPart(dcGuild, dcMember, wordPart.getValue()));
+		}
+
+		final StringBuilder sb = new StringBuilder();
+		final int msgSize = linkMap.size() + wordMap.size();
+		for (int i = 0; i < msgSize; i++) {
+			if (wordMap.get(i) != null) {
+				sb.append(wordMap.get(i)).append(" ");
+				continue;
+			}
+
+			if (linkMap.get(i) != null) {
+				sb.append(linkMap.get(i)).append(" ");
+			}
+		}
+
+		return sb.toString().trim();
 	}
 
 	private boolean isLink(final String token) {
 		final Pattern pattern = Pattern.compile(LINK_REGEX);
 		final Matcher matcher = pattern.matcher(token);
 		return matcher.find();
+	}
+
+	private void addToWordMap(final Map<Integer, String> wordMap, final int pos, final String token) {
+		if (wordMap.get(pos) == null) {
+			wordMap.put(pos, token);
+			return;
+		}
+
+		final String currentValue = wordMap.get(pos);
+		wordMap.put(pos, currentValue + " " + token);
 	}
 
 	private String censorLink(final DiscordGuild dcGuild, final DiscordMember dcMember, final String link) {
@@ -146,36 +188,36 @@ public class Censor {
 		return false;
 	}
 
-	private String censorWord(final DiscordGuild dcGuild, final DiscordMember dcMember, final String token) {
-		String newToken = token;
+	private String censorWordPart(final DiscordGuild dcGuild, final DiscordMember dcMember, final String wordPart) {
+		String newPart = wordPart;
 		for (BadWord badWord : dcGuild.getBadWordsOrderdByWordLength()) {
 			final Pattern pattern = badWord.isWildcard() ?
 					Pattern.compile("(?i)" + badWord.getWord()) :                            // (?i) to ignore case
 					Pattern.compile("(?i)(^|(?<=[\\p{S}\\p{P}\\p{C}\\s]))" + badWord.getWord() + "((?=[\\p{S}\\p{P}\\p{C}\\s])|$)");
 
-			String replacement = badWord.getReplacement();
-			final Matcher matcher = pattern.matcher(token);
+			final String replacement = badWord.getReplacement();
+			final Matcher matcher = pattern.matcher(newPart);
+			final StringBuffer sb = new StringBuffer();
 			while (matcher.find()) {
-				newToken = matcher.replaceAll(replacement);
+				matcher.appendReplacement(sb, replacement);
 				dcMember.increaseWordCensorCount();
+
+				if (badWord.isPunishable()) {
+					dcMember.increaseWarningCount();
+				}
 			}
+
+			matcher.appendTail(sb);
+			newPart = sb.toString();
 		}
 
-		return newToken;
-	}
-
-	private String generateTokenString(final List<String> tokens) {
-		return buildString(tokens, " ");
+		return newPart;
 	}
 
 	private String generateLineString(final List<String> lines) {
-		return buildString(lines, "\n");
-	}
-
-	private String buildString(final List<String> parts, final String filler) {
 		final StringBuilder sb = new StringBuilder();
-		for (String part : parts) {
-			sb.append(part).append(filler);
+		for (String part : lines) {
+			sb.append(part).append("\n");
 		}
 
 		return sb.toString().trim();
@@ -187,13 +229,13 @@ public class Censor {
 		return !originalNoFormat.equalsIgnoreCase(resultNoFormat);
 	}
 
-	private void replaceMessage(final Message message, final String newMessage) {
+	private void replaceMessage(final Message message, final String newMessage, final String warnMessage) {
 		final TextChannel channel = message.getTextChannel();
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(new Color(222, 105, 12));
 		eb.setAuthor(message.getAuthor().getName(), null, message.getAuthor().getEffectiveAvatarUrl());
 		eb.setTitle("Message censored:").setDescription(getWrappedMessage(newMessage));
-		eb.setFooter("Avoid censored words/links in the future!");
+		eb.setFooter(warnMessage);
 		addAttachedImages(eb, message);
 		tryCensor(channel, message, eb);
 	}
@@ -234,5 +276,17 @@ public class Censor {
 				}
 			}
 		}
+	}
+
+	private void kickMember(final Guild guild, final DiscordGuild dcGuild, final DiscordMember dcMember) {
+		guild.retrieveMemberById(dcMember.getDiscordId()).queue(
+				member -> member.kick("Kicked for reaching " + dcGuild.getCensorKickThreshold() +
+						" censor infractions (infractions: " + dcMember.getWarningCount() + ")!").queue(
+						v -> LogUtil.logInfo("Kicked " + member.getUser().getAsTag() + " for reaching the censor limit of guild " + guild.getName()),
+						throwable -> LogUtil.logWarning("Could not kick " + member.getUser().getAsTag() + " for reaching the " +
+								"censor limit of guild \"" + guild.getName() + "\":" + throwable.getMessage())
+				),
+				throwable -> LogUtil.logDebug("Could not retrieve author to kick for censor.")
+		);
 	}
 }

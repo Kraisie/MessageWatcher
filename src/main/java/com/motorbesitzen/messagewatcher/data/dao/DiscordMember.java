@@ -30,6 +30,10 @@ public class DiscordMember {
 	private long linkCensorCount;
 
 	@NotNull
+	@ColumnDefault("0")
+	private long warningCount;
+
+	@NotNull
 	@ManyToOne
 	@JoinColumn(name = "guildId")
 	private DiscordGuild guild;
@@ -58,6 +62,10 @@ public class DiscordMember {
 		linkCensorCount++;
 	}
 
+	public void increaseWarningCount() {
+		warningCount++;
+	}
+
 	public long getId() {
 		return id;
 	}
@@ -76,6 +84,10 @@ public class DiscordMember {
 
 	public long getLinkCensorCount() {
 		return linkCensorCount;
+	}
+
+	public long getWarningCount() {
+		return warningCount;
 	}
 
 	public double getCensorsPerMessage() {

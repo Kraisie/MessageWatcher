@@ -18,14 +18,15 @@ public enum CommandInfo {
 
 		@Override
 		public String getUsage() {
-			return getName() + " \"word\" \"replacement\" \"(true|false)\"";
+			return getName() + " \"word\" \"replacement\" \"(true|false)\" \"(true|false)\"";
 		}
 
 		@Override
 		public String getDescription() {
 			return "Adds a bad word to the database. A blank (\"\") replacement " +
 					"defaults to \"\\*\\*\\*\". The wildcard flag is also optional and " +
-					"defaults to false if blank. Word supports (Java escaped) regex.";
+					"defaults to false if blank. The last option marks the word as punishable " +
+					"so a user will get kicked if he uses it x times. Word supports (Java escaped) regex.";
 		}
 	}, ADD_BLACKLISTED_DOMAIN {
 		@Override
@@ -89,6 +90,21 @@ public enum CommandInfo {
 		@Override
 		public String getDescription() {
 			return "Displays the censor stats of the given user.";
+		}
+	}, CENSOR_SETTINGS {
+		@Override
+		public String getName() {
+			return "censorsettings";
+		}
+
+		@Override
+		public String getUsage() {
+			return getName() + " punishableCensorsToKick";
+		}
+
+		@Override
+		public String getDescription() {
+			return "Sets the amount of censors of punishable words that triggers a kick of a user.";
 		}
 	}, DEL_BAD_WORD {
 		@Override

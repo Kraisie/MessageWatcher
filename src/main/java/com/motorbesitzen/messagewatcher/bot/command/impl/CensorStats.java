@@ -55,6 +55,7 @@ public class CensorStats extends CommandImpl {
 		final long msgCount = dcMember.getMessageCount();
 		final long wordCount = dcMember.getWordCensorCount();
 		final long linkCount = dcMember.getLinkCensorCount();
+		final long warningCount = dcMember.getWarningCount();
 
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Censor stats for " + discordTag + ":");
@@ -62,6 +63,7 @@ public class CensorStats extends CommandImpl {
 		eb.addField("Messages sent:", String.valueOf(msgCount), true);
 		eb.addField("Words censored:", String.valueOf(wordCount), true);
 		eb.addField("Links censored:", String.valueOf(linkCount), true);
+		eb.addField("Censor warnings:", String.valueOf(warningCount), true);
 		eb.addBlankField(false);
 
 		final NumberFormat nf = generateNumberFormat();

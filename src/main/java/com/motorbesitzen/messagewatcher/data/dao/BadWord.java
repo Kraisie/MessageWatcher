@@ -30,16 +30,23 @@ public class BadWord {
 	private boolean wildcard;
 
 	@NotNull
+	@ColumnDefault("false")
+	private boolean punishable;
+
+	@NotNull
 	@ManyToOne
 	@JoinColumn(name = "guildId")
 	private DiscordGuild guild;
 
-	protected BadWord() {}
+	protected BadWord() {
+	}
 
-	public BadWord(@NotNull @NotBlank @Length(max = 100) String word, @NotNull @NotBlank @Length(max = 100) String replacement, @NotNull boolean wildcard, @NotNull DiscordGuild guild) {
+	public BadWord(@NotNull @NotBlank @Length(max = 100) String word, @NotNull @NotBlank @Length(max = 100) String replacement,
+				   @NotNull boolean wildcard, @NotNull boolean punishable, @NotNull DiscordGuild guild) {
 		this.word = word;
 		this.replacement = replacement;
 		this.wildcard = wildcard;
+		this.punishable = punishable;
 		this.guild = guild;
 	}
 
@@ -57,6 +64,10 @@ public class BadWord {
 
 	public boolean isWildcard() {
 		return wildcard;
+	}
+
+	public boolean isPunishable() {
+		return punishable;
 	}
 
 	public DiscordGuild getGuild() {
