@@ -50,6 +50,10 @@ public class AddBlacklistedDomain extends CommandImpl {
 
 	private void saveMentionedDomains(final DiscordGuild dcGuild, final List<String> domainNames) {
 		for (String domainName : domainNames) {
+			if (domainName.isBlank()) {
+				continue;
+			}
+
 			final BlacklistedDomain domain = new BlacklistedDomain(domainName, dcGuild);
 			dcGuild.addBlacklistedDomain(domain);
 		}

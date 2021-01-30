@@ -50,16 +50,12 @@ public final class DiscordMessageUtil {
 	public static List<String> getStringsInQuotationMarks(final String content) {
 		final Pattern pattern = Pattern.compile("\"[^\" ]*\"");
 		final Matcher matcher = pattern.matcher(content);
-		final List<String> domainNames = new ArrayList<>();
+		final List<String> quoted = new ArrayList<>();
 		while (matcher.find()) {
-			final String domainName = matcher.group().replaceAll("\"", "");
-			if (domainName.isBlank()) {
-				continue;
-			}
-
-			domainNames.add(domainName);
+			final String quote = matcher.group().replaceAll("\"", "");
+			quoted.add(quote);
 		}
 
-		return domainNames;
+		return quoted;
 	}
 }

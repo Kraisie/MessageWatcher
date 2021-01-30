@@ -51,6 +51,10 @@ public class DeleteBlacklistedDomain extends CommandImpl {
 
 	private void deleteMentionedDomains(final DiscordGuild dcGuild, final List<String> domainNames) {
 		for (String domainName : domainNames) {
+			if (domainName.isBlank()) {
+				continue;
+			}
+
 			final Optional<BlacklistedDomain> blacklistedDomainOpt = domainRepo.findByDomainAndGuild_GuildId(domainName, dcGuild.getGuildId());
 			blacklistedDomainOpt.ifPresent(domainRepo::delete);
 		}

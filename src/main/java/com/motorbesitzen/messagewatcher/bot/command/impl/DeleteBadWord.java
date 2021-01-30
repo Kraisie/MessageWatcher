@@ -51,6 +51,10 @@ public class DeleteBadWord extends CommandImpl {
 
 	private void deleteMentionedWords(final DiscordGuild dcGuild, final List<String> badWords) {
 		for (String badWord : badWords) {
+			if (badWord.isBlank()) {
+				continue;
+			}
+
 			final Optional<BadWord> badWordOpt = badWordRepo.findByWordAndGuild_GuildId(badWord, dcGuild.getGuildId());
 			badWordOpt.ifPresent(badWordRepo::delete);
 		}
