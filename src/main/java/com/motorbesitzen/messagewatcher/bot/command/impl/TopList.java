@@ -96,13 +96,15 @@ public class TopList extends CommandImpl {
 			final long linkCensors = dcMember.getLinkCensorCount();
 			final double censorsPerMessage = dcMember.getCensorsPerMessage();
 			final double censorRating = dcMember.getCensorRating();
+			final long warningCount = dcMember.getWarningCount();
 			eb.addField("",
 					"**" + pos++ + "**. " + "<@" + dcMember.getDiscordId() + ">\n" +
 							"Messages sent: " + messagesSent + "\n" +
 							"Words censored: " + wordCensors + "\n" +
 							"Links censored: " + linkCensors + "\n" +
 							"Censors per message: " + nf.format(censorsPerMessage) + "\n" +
-							"Censor Rating: " + nf.format(censorRating),
+							"Censor Rating: " + nf.format(censorRating) + "\n" +
+							"Warnings: " + warningCount,
 					true
 			);
 		}
