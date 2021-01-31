@@ -15,10 +15,18 @@ public interface DiscordMemberRepo extends CrudRepository<DiscordMember, Long> {
 
 	List<DiscordMember> findAllByGuild_GuildIdOrderByLinkCensorCountDesc(final long guildId, final Pageable pageable);
 
+	List<DiscordMember> findAllByGuild_GuildIdAndWarningCountIsGreaterThanOrderByWarningCountDesc(final long guildId, final long minWarns, final Pageable pageable);
+
 	@Query("select d " +
 			"from DiscordMember d " +
 			"where d.guild.guildId = ?1 " +
 			"order by ((d.wordCensorCount + d.linkCensorCount) * ((d.wordCensorCount + d.linkCensorCount) / d.messageCount)) desc")
 	List<DiscordMember> findAllByGuild_GuildIdOrderByRating(long guildId, Pageable pageable);
+
+	@Query("select d " +
+			"from DiscordMember d " +
+			"where d.guild.guildId = ?1 " +
+			"order by ((d.wordCensorCount + d.linkCensorCount) / d.messageCount) desc")
+	List<DiscordMember> findAllByGuild_GuildIdOrderByCensorsPerMessage(long guildId, Pageable pageable);
 
 }

@@ -250,7 +250,7 @@ public enum CommandInfo {
 
 		@Override
 		public String getUsage() {
-			return getName() + " \"(word|link|rating)\" (1-25)";
+			return getName() + " \"(word|link|rating|warn|cpm)\" (1-25)";
 		}
 
 		@Override

@@ -49,6 +49,10 @@ public class TopList extends CommandImpl {
 				return memberRepo.findAllByGuild_GuildIdOrderByRating(guildId, pageRequest);
 			case "link":
 				return memberRepo.findAllByGuild_GuildIdOrderByLinkCensorCountDesc(guildId, pageRequest);
+			case "warn":
+				return memberRepo.findAllByGuild_GuildIdAndWarningCountIsGreaterThanOrderByWarningCountDesc(guildId, 0, pageRequest);
+			case "cpm":
+				return memberRepo.findAllByGuild_GuildIdOrderByCensorsPerMessage(guildId, pageRequest);
 			case "word":
 			default:
 				return memberRepo.findAllByGuild_GuildIdOrderByWordCensorCountDesc(guildId, pageRequest);
