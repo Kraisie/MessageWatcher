@@ -50,7 +50,7 @@ public class TopList extends CommandImpl {
 			case "link":
 				return memberRepo.findAllByGuild_GuildIdOrderByLinkCensorCountDesc(guildId, pageRequest);
 			case "warn":
-				return memberRepo.findAllByGuild_GuildIdAndWarningCountIsGreaterThanOrderByWarningCountDesc(guildId, 0, pageRequest);
+				return memberRepo.findAllByGuild_GuildIdOrderByWarningCountDesc(guildId, pageRequest);
 			case "cpm":
 				return memberRepo.findAllByGuild_GuildIdOrderByCensorsPerMessage(guildId, pageRequest);
 			case "word":
