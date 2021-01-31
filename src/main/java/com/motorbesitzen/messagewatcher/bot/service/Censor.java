@@ -99,13 +99,21 @@ public class Censor {
 		final String[] tokens = line.split(" +");
 
 		int pos = 0;
-		for (String token : tokens) {
-			if (isLink(token)) {
-				linkMap.put(pos + 1, token);
-				pos += 2;
+		for (int i = 0; i < tokens.length; i++) {
+			if (isLink(tokens[i])) {
+				linkMap.put(pos, tokens[i]);
 			} else {
-				addToWordMap(wordMap, pos, token);
+				int j = i;
+				do {
+					addToWordMap(wordMap, pos, tokens[j]);
+					if (++j >= tokens.length) {
+						break;
+					}
+				} while (!isLink(tokens[j]));
+				i = j - 1;
 			}
+
+			pos++;
 		}
 
 		for (Map.Entry<Integer, String> link : linkMap.entrySet()) {
@@ -283,7 +291,7 @@ public class Censor {
 				member -> member.kick("Kicked for reaching " + dcGuild.getCensorKickThreshold() +
 						" censor infractions (infractions: " + dcMember.getWarningCount() + ")!").queue(
 						v -> LogUtil.logInfo("Kicked " + member.getUser().getAsTag() + " for reaching the censor limit of guild " + guild.getName()),
-						throwable -> LogUtil.logWarning("Could not kick " + member.getUser().getAsTag() + " for reaching the " +
+						throwable -> LogUtil.logDebug("Could not kick " + member.getUser().getAsTag() + " for reaching the " +
 								"censor limit of guild \"" + guild.getName() + "\":" + throwable.getMessage())
 				),
 				throwable -> LogUtil.logDebug("Could not retrieve author to kick for censor.")
