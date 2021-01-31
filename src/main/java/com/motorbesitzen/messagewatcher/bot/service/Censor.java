@@ -96,8 +96,29 @@ public class Censor {
 	private String censorLine(final DiscordGuild dcGuild, final DiscordMember dcMember, final String line) {
 		final Map<Integer, String> linkMap = new HashMap<>();
 		final Map<Integer, String> wordMap = new HashMap<>();
-		final String[] tokens = line.split(" +");
+		splitLine(line, linkMap, wordMap);
+		censorParts(dcGuild, dcMember, linkMap, wordMap);
+		return stitchMessage(dcGuild, dcMember, linkMap, wordMap);
+	}
 
+	private boolean isLink(final String token) {
+		final Pattern pattern = Pattern.compile(LINK_REGEX);
+		final Matcher matcher = pattern.matcher(token);
+		return matcher.find();
+	}
+
+	private void addToWordMap(final Map<Integer, String> wordMap, final int pos, final String token) {
+		if (wordMap.get(pos) == null) {
+			wordMap.put(pos, token);
+			return;
+		}
+
+		final String currentValue = wordMap.get(pos);
+		wordMap.put(pos, currentValue + " " + token);
+	}
+
+	private void splitLine(final String line, final Map<Integer, String> linkMap, final Map<Integer, String> wordMap) {
+		final String[] tokens = line.split(" +");
 		int pos = 0;
 		for (int i = 0; i < tokens.length; i++) {
 			if (isLink(tokens[i])) {
@@ -115,7 +136,9 @@ public class Censor {
 
 			pos++;
 		}
+	}
 
+	private void censorParts(final DiscordGuild dcGuild, final DiscordMember dcMember, final Map<Integer, String> linkMap, final Map<Integer, String> wordMap) {
 		for (Map.Entry<Integer, String> link : linkMap.entrySet()) {
 			link.setValue(censorLink(dcGuild, dcMember, link.getValue()));
 		}
@@ -123,7 +146,9 @@ public class Censor {
 		for (Map.Entry<Integer, String> wordPart : wordMap.entrySet()) {
 			wordPart.setValue(censorWordPart(dcGuild, dcMember, wordPart.getValue()));
 		}
+	}
 
+	private String stitchMessage(final DiscordGuild dcGuild, final DiscordMember dcMember, final Map<Integer, String> linkMap, final Map<Integer, String> wordMap) {
 		final StringBuilder sb = new StringBuilder();
 		final int msgSize = linkMap.size() + wordMap.size();
 		for (int i = 0; i < msgSize; i++) {
@@ -138,22 +163,6 @@ public class Censor {
 		}
 
 		return sb.toString().trim();
-	}
-
-	private boolean isLink(final String token) {
-		final Pattern pattern = Pattern.compile(LINK_REGEX);
-		final Matcher matcher = pattern.matcher(token);
-		return matcher.find();
-	}
-
-	private void addToWordMap(final Map<Integer, String> wordMap, final int pos, final String token) {
-		if (wordMap.get(pos) == null) {
-			wordMap.put(pos, token);
-			return;
-		}
-
-		final String currentValue = wordMap.get(pos);
-		wordMap.put(pos, currentValue + " " + token);
 	}
 
 	private String censorLink(final DiscordGuild dcGuild, final DiscordMember dcMember, final String link) {
