@@ -42,6 +42,11 @@ public class AddBadWord extends CommandImpl {
 			return;
 		}
 
+		if (badWordProperties.get(0).length() > 100 || badWordProperties.get(1).length() > 100) {
+			sendErrorMessage(channel, "Words are limited to 100 characters. Please do not exceed that limit.");
+			return;
+		}
+
 		try {
 			Pattern.compile(badWordProperties.get(0));
 		} catch (PatternSyntaxException e) {

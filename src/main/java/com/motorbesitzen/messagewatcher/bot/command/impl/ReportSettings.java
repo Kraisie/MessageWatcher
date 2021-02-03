@@ -65,7 +65,7 @@ public class ReportSettings extends CommandImpl {
 
 		final Emote reportEmote = mentionedEmotes.get(0);
 		if (!reportEmote.isAvailable()) {
-			sendErrorMessage(message.getTextChannel(), "Emotes is not available!");
+			sendErrorMessage(message.getTextChannel(), "Emote is not available!");
 			return 0L;
 		}
 
