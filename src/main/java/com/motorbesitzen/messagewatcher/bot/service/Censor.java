@@ -62,7 +62,7 @@ public class Censor {
 			replaceMessage(message, censoredContent, warnMessage);
 		}
 
-		if (originalWarnCount != dcMember.getWarningCount() && dcMember.getWarningCount() >= dcGuild.getCensorKickThreshold()) {
+		if (dcGuild.getCensorKickThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() && dcMember.getWarningCount() >= dcGuild.getCensorKickThreshold()) {
 			kickMember(guild, dcGuild, dcMember);
 		}
 
