@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -296,6 +297,14 @@ public class Censor {
 	}
 
 	private void kickMember(final Guild guild, final DiscordGuild dcGuild, final DiscordMember dcMember) {
+		try {
+			tryKick(guild, dcGuild, dcMember);
+		} catch (HierarchyException e) {
+			LogUtil.logDebug("Could not kick member " + dcMember.getDiscordId() + " on \"" + guild.getName() + "\".", e);
+		}
+	}
+
+	private void tryKick(final Guild guild, final DiscordGuild dcGuild, final DiscordMember dcMember) throws HierarchyException {
 		guild.retrieveMemberById(dcMember.getDiscordId()).queue(
 				member -> member.kick("Kicked for reaching " + dcGuild.getCensorKickThreshold() +
 						" censor infractions (infractions: " + dcMember.getWarningCount() + ")!").queue(
