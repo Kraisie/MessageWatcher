@@ -70,7 +70,7 @@ public class CensorStats extends CommandImpl {
 		final double censorsPerMessage = dcMember.getCensorsPerMessage();
 		final double censorRating = dcMember.getCensorRating();
 		eb.addField("Censors per message:", nf.format(censorsPerMessage), true);
-		eb.addField("\"Rating\":", nf.format(censorRating), true);
+		eb.addField("Rating:", nf.format(censorRating), true);
 
 		answer(channel, eb.build());
 	}

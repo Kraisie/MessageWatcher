@@ -19,7 +19,7 @@ public interface DiscordMemberRepo extends CrudRepository<DiscordMember, Long> {
 
 	@Query("select d " +
 			"from DiscordMember d " +
-			"where d.guild.guildId = ?1 and d.linkCensorCount > 0" +
+			"where d.guild.guildId = ?1 and d.linkCensorCount > 0 " +
 			"order by d.linkCensorCount desc, d.messageCount desc")
 	List<DiscordMember> findAllByGuild_GuildIdOrderByLinkCensorCountDesc(final long guildId, final Pageable pageable);
 
@@ -31,14 +31,15 @@ public interface DiscordMemberRepo extends CrudRepository<DiscordMember, Long> {
 
 	@Query("select d " +
 			"from DiscordMember d " +
-			"where d.guild.guildId = ?1 and d.messageCount > 0" +
-			"order by ((d.wordCensorCount + d.linkCensorCount) * ((d.wordCensorCount + d.linkCensorCount) / d.messageCount)) desc, d.messageCount desc")
+			"where d.guild.guildId = ?1 and d.messageCount > 25 " +
+			"order by ((2 * CAST((d.wordCensorCount + d.linkCensorCount) as double) + 3 * CAST(d.warningCount as double)) / " +
+			"(CAST(d.messageCount as double) / (CAST((2 * (d.warningCount + 1)) as double)))) desc, d.messageCount desc")
 	List<DiscordMember> findAllByGuild_GuildIdOrderByRating(long guildId, Pageable pageable);
 
 	@Query("select d " +
 			"from DiscordMember d " +
-			"where d.guild.guildId = ?1 and d.messageCount > 0" +
-			"order by ((d.wordCensorCount + d.linkCensorCount) / d.messageCount) desc, d.messageCount desc")
+			"where d.guild.guildId = ?1 and d.messageCount > 25 " +
+			"order by ((cast(d.wordCensorCount as double) + cast(d.linkCensorCount as double)) / cast(d.messageCount as double)) desc, d.messageCount desc")
 	List<DiscordMember> findAllByGuild_GuildIdOrderByCensorsPerMessage(long guildId, Pageable pageable);
 
 }

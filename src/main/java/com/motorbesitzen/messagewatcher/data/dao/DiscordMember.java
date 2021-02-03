@@ -95,7 +95,7 @@ public class DiscordMember {
 	}
 
 	public double getCensorRating() {
-		return (double) (wordCensorCount + linkCensorCount) * getCensorsPerMessage();
+		return (2f * (double) (wordCensorCount + linkCensorCount) + 3f * (double) warningCount) / ((double) messageCount / (double) (2 * (warningCount + 1)));
 	}
 
 	public DiscordGuild getGuild() {

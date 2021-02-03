@@ -102,8 +102,8 @@ public class TopList extends CommandImpl {
 							"Messages sent: " + messagesSent + "\n" +
 							"Words censored: " + wordCensors + "\n" +
 							"Links censored: " + linkCensors + "\n" +
-							"Censors per message: " + nf.format(censorsPerMessage) + "\n" +
-							"Censor Rating: " + nf.format(censorRating) + "\n" +
+							"CPM: " + nf.format(censorsPerMessage) + "\n" +
+							"Rating: " + nf.format(censorRating) + "\n" +
 							"Warnings: " + warningCount,
 					true
 			);
@@ -113,7 +113,7 @@ public class TopList extends CommandImpl {
 	private NumberFormat generateNumberFormat() {
 		final NumberFormat nf = NumberFormat.getNumberInstance();
 		nf.setMinimumFractionDigits(2);
-		nf.setMaximumFractionDigits(2);
+		nf.setMaximumFractionDigits(4);
 		nf.setRoundingMode(RoundingMode.HALF_UP);
 		return nf;
 	}
