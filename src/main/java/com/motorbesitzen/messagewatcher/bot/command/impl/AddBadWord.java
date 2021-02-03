@@ -45,7 +45,8 @@ public class AddBadWord extends CommandImpl {
 		try {
 			Pattern.compile(badWordProperties.get(0));
 		} catch (PatternSyntaxException e) {
-			sendErrorMessage(channel, "Invalid regex! " + e.getMessage().split("\n")[0] + " of \"" + badWordProperties.get(0) + "\".");
+			sendErrorMessage(channel, "Invalid regex! " +
+					e.getMessage().split("\n")[0] + " of \"" + badWordProperties.get(0).replaceAll("\\*", "\\\\*") + "\".");
 			return;
 		}
 
