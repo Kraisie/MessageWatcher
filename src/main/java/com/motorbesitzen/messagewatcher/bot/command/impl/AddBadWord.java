@@ -6,6 +6,7 @@ import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 @Service("addbw")
 public class AddBadWord extends CommandImpl {
@@ -30,16 +33,24 @@ public class AddBadWord extends CommandImpl {
 		final long guildId = event.getGuild().getIdLong();
 		final Optional<DiscordGuild> discordGuildOpt = guildRepo.findById(guildId);
 		final DiscordGuild dcGuild = discordGuildOpt.orElseGet(() -> createDiscordGuild(guildId));
+		final TextChannel channel = event.getChannel();
 		final Message message = event.getMessage();
 		final String content = message.getContentRaw();
 		final List<String> badWordProperties = DiscordMessageUtil.getStringsInQuotationMarks(content);
 		if (badWordProperties.size() != 4) {
-			sendErrorMessage(event.getChannel(), "Please use the correct syntax of the command.");
+			sendErrorMessage(channel, "Please use the correct syntax of the command.");
+			return;
+		}
+
+		try {
+			Pattern.compile(badWordProperties.get(0));
+		} catch (PatternSyntaxException e) {
+			sendErrorMessage(channel, "Invalid regex! " + e.getMessage().split("\n")[0] + " of \"" + badWordProperties.get(0) + "\".");
 			return;
 		}
 
 		saveBadWord(dcGuild, badWordProperties);
-		answer(event.getChannel(), "Added the word to the database.");
+		answer(channel, "Added the word to the database.");
 	}
 
 	private DiscordGuild createDiscordGuild(final long guildId) {

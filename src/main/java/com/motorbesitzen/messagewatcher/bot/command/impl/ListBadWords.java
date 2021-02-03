@@ -45,7 +45,9 @@ public class ListBadWords extends CommandImpl {
 			}
 
 			final BadWord bw = badWords.get(i);
-			eb.addField("", (bw.isPunishable() ? "[!]" : "") + "**\"" + bw.getWord() + "\"** ➝ \"" + bw.getReplacement() +
+			// discord has text formatting with *text* being cursive so escape the words
+			final String word = bw.getWord().replaceAll("\\*", "\\\\*");
+			eb.addField("", (bw.isPunishable() ? "[!]" : "") + "**\"" + word + "\"** ➝ \"" + bw.getReplacement() +
 					"\" " + (bw.isWildcard() ? "(wildcard)" : ""), false);
 		}
 
