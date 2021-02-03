@@ -27,7 +27,8 @@ public class ReactionListener extends ListenerAdapter {
 	@Override
 	public void onGuildMessageReactionAdd(final GuildMessageReactionAddEvent event) {
 		event.getChannel().retrieveMessageById(event.getMessageIdLong()).queue(
-				msg -> handleReaction(event, msg)
+				msg -> handleReaction(event, msg),
+				throwable -> LogUtil.logDebug("Could not retrieve message of react with ID " + event.getMessageIdLong(), throwable)
 		);
 	}
 
@@ -127,6 +128,10 @@ public class ReactionListener extends ListenerAdapter {
 	private void buildEmbedCallback(final TextChannel reportChannel, final EmbedBuilder reportEmbed, final Message message, final Emote reportEmote) {
 		final List<MessageReaction> reactions = message.getReactions();
 		for (MessageReaction reaction : reactions) {
+			if (reaction.getReactionEmote().isEmoji()) {
+				continue;
+			}
+
 			if (reaction.getReactionEmote().getIdLong() == reportEmote.getIdLong()) {
 				reaction.retrieveUsers().queue(
 						reporters -> buildEmbedCallbackReporters(reportChannel, reportEmbed, message, reporters)

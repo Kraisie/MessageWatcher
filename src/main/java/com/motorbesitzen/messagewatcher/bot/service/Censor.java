@@ -301,9 +301,9 @@ public class Censor {
 						" censor infractions (infractions: " + dcMember.getWarningCount() + ")!").queue(
 						v -> LogUtil.logInfo("Kicked " + member.getUser().getAsTag() + " for reaching the censor limit of guild " + guild.getName()),
 						throwable -> LogUtil.logDebug("Could not kick " + member.getUser().getAsTag() + " for reaching the " +
-								"censor limit of guild \"" + guild.getName() + "\":" + throwable.getMessage())
+								"censor limit of guild \"" + guild.getName(), throwable)
 				),
-				throwable -> LogUtil.logDebug("Could not retrieve author to kick for censor.")
+				throwable -> LogUtil.logDebug("Could not retrieve author to kick for censor.", throwable)
 		);
 	}
 }
