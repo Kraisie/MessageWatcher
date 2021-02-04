@@ -208,7 +208,7 @@ public class Censor {
 
 	private String censorWordPart(final DiscordGuild dcGuild, final DiscordMember dcMember, final String wordPart) {
 		String newPart = wordPart;
-		for (BadWord badWord : dcGuild.getBadWordsOrderdByWordLength()) {
+		for (BadWord badWord : dcGuild.getBadWordsOrderdByWordLengthDesc()) {
 			final Pattern pattern = badWord.isWildcard() ?
 					Pattern.compile("(?i)" + badWord.getWord()) :                            // (?i) to ignore case
 					Pattern.compile("(?i)(^|(?<=[\\p{S}\\p{P}\\p{C}\\s]))" + badWord.getWord() + "((?=[\\p{S}\\p{P}\\p{C}\\s])|$)");

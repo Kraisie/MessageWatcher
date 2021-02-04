@@ -148,9 +148,10 @@ public class DiscordGuild {
 		return badWordList;
 	}
 
-	public List<BadWord> getBadWordsOrderdByWordLength() {
+	public List<BadWord> getBadWordsOrderdByWordLengthDesc() {
 		List<BadWord> badWordList = new ArrayList<>(getBadWords());
 		badWordList.sort(Comparator.comparingInt(e -> e.getWord().length()));
+		Collections.reverse(badWordList);
 		return badWordList;
 	}
 
