@@ -5,6 +5,7 @@ import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.messagewatcher.data.dao.ModRole;
 import com.motorbesitzen.messagewatcher.data.dao.WhitelistedChannel;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
+import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
@@ -73,7 +74,7 @@ public class Info extends CommandImpl {
 
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Info for \"" + event.getGuild().getName() + "\":");
-		eb.setColor(getEmbedColor());
+		eb.setColor(DiscordMessageUtil.getEmbedColor());
 		eb.addField("Censors of punishable words to kick:", String.valueOf(dcGuild.getCensorKickThreshold()), false);
 		setReportInfo(eb, event.getGuild(), dcGuild);
 		eb.addBlankField(false);

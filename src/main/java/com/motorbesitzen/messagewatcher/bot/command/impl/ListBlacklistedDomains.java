@@ -4,6 +4,7 @@ import com.motorbesitzen.messagewatcher.bot.command.CommandImpl;
 import com.motorbesitzen.messagewatcher.data.dao.BlacklistedDomain;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
+import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,7 @@ public class ListBlacklistedDomains extends CommandImpl {
 						"Blacklisted domains" :
 						"Blacklisted domains [" + page + "/" + totalPages + "]"
 		).setDescription("A list of all blacklisted domains.");
-		eb.setColor(getEmbedColor());
+		eb.setColor(DiscordMessageUtil.getEmbedColor());
 		return eb;
 	}
 }

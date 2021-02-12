@@ -1,15 +1,11 @@
 package com.motorbesitzen.messagewatcher.bot.command;
 
-import com.motorbesitzen.messagewatcher.util.EnvironmentUtil;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
-import com.motorbesitzen.messagewatcher.util.ParseUtil;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.stereotype.Service;
-
-import java.awt.*;
 
 /**
  * Basic implementation of a Command. Has all needed methods to send messages, answer to commands and log (debug) actions.
@@ -123,26 +119,5 @@ public class CommandImpl implements Command {
 	@Override
 	public void sendErrorMessage(final TextChannel channel, final String errorMessage) {
 		answer(channel, errorMessage);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Color getEmbedColor() {
-		String envR = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_R", "222");
-		String envG = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_G", "105");
-		String envB = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_B", "12");
-
-		int r = ParseUtil.safelyParseStringToInt(envR);
-		int g = ParseUtil.safelyParseStringToInt(envG);
-		int b = ParseUtil.safelyParseStringToInt(envB);
-
-		// make sure r,g,b stay in rgb range of 0-255
-		return new Color(
-				Math.max(0, r % 256),
-				Math.max(0, g % 256),
-				Math.max(0, b % 256)
-		);
 	}
 }

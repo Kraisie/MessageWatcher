@@ -6,6 +6,7 @@ import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordMember;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordMemberRepo;
+import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,10 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -250,7 +249,7 @@ public class Censor {
 	private void replaceMessage(final Message message, final String newMessage, final String warnMessage) {
 		final TextChannel channel = message.getTextChannel();
 		final EmbedBuilder eb = new EmbedBuilder();
-		eb.setColor(new Color(222, 105, 12));
+		eb.setColor(DiscordMessageUtil.getEmbedColor());
 		eb.setAuthor(message.getAuthor().getName(), null, message.getAuthor().getEffectiveAvatarUrl());
 		eb.setTitle("Message censored:").setDescription(getWrappedMessage(newMessage));
 		eb.setFooter(warnMessage);

@@ -2,6 +2,7 @@ package com.motorbesitzen.messagewatcher.bot.command.impl;
 
 import com.motorbesitzen.messagewatcher.bot.command.CommandImpl;
 import com.motorbesitzen.messagewatcher.bot.command.CommandInfo;
+import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import com.motorbesitzen.messagewatcher.util.EnvironmentUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -49,7 +50,7 @@ public class Help extends CommandImpl {
 	 */
 	private EmbedBuilder buildHelpMessage(final List<CommandInfo> commands) {
 		final EmbedBuilder eb = new EmbedBuilder();
-		eb.setColor(getEmbedColor());
+		eb.setColor(DiscordMessageUtil.getEmbedColor());
 		eb.setTitle("Commands and their variations")
 				.setDescription("A list of all commands the bot offers and what they do. " +
 						"Note that \"(a|b|c)\" means that a, b or c can be chosen.");

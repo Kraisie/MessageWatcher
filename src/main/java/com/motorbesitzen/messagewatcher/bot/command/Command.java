@@ -5,8 +5,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
-import java.awt.*;
-
 /**
  * The interface for any Command the bot can handle.
  */
@@ -103,12 +101,4 @@ public interface Command {
 	 * @param errorMessage The error message to send.
 	 */
 	void sendErrorMessage(TextChannel channel, String errorMessage);
-
-	/**
-	 * Defines the color used for embeds in Discord (color bar on the left). If no color is set in the environment
-	 * variables it returns orange ({@code #de690c} / {@code rgb(222,105,12)}).
-	 *
-	 * @return The color to use for embeds.
-	 */
-	Color getEmbedColor();
 }

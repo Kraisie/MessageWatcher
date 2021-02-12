@@ -59,7 +59,7 @@ public class CensorStats extends CommandImpl {
 
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Censor stats for " + discordTag + ":");
-		eb.setColor(getEmbedColor());
+		eb.setColor(DiscordMessageUtil.getEmbedColor());
 		eb.addField("Messages sent:", String.valueOf(msgCount), true);
 		eb.addField("Words censored:", String.valueOf(wordCount), true);
 		eb.addField("Links censored:", String.valueOf(linkCount), true);

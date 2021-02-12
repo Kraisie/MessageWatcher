@@ -81,7 +81,7 @@ public class TopList extends CommandImpl {
 	private EmbedBuilder buildTopMessage(final Guild guild, final List<DiscordMember> topMembers) {
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Top " + topMembers.size() + " of " + guild.getName() + ":");
-		eb.setColor(getEmbedColor());
+		eb.setColor(DiscordMessageUtil.getEmbedColor());
 		addMemberFields(eb, topMembers);
 
 		return eb;
