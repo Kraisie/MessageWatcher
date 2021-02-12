@@ -252,7 +252,7 @@ public class Censor {
 		eb.setAuthor(message.getAuthor().getName(), null, message.getAuthor().getEffectiveAvatarUrl());
 		eb.setTitle("Message censored:").setDescription(getWrappedMessage(newMessage));
 		eb.setFooter(warnMessage);
-		addAttachedImages(eb, message);
+		addAttachment(eb, message);
 		tryCensor(channel, message, eb);
 	}
 
@@ -290,15 +290,15 @@ public class Censor {
 		}
 	}
 
-	private void addAttachedImages(final EmbedBuilder eb, final Message message) {
+	private void addAttachment(final EmbedBuilder eb, final Message message) {
 		List<Message.Attachment> attachments = message.getAttachments();
-		if (attachments.size() > 0) {
-			for (Message.Attachment attachment : attachments) {
-				if (attachment.isImage()) {
-					eb.setImage(attachment.getProxyUrl());
-					break;
-				}
-			}
+		if (attachments.size() == 0) {
+			return;
+		}
+
+		Message.Attachment attachment = attachments.get(0);
+		if (attachment.isImage()) {
+			eb.setImage(attachment.getProxyUrl());
 		}
 	}
 
