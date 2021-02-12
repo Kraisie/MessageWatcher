@@ -291,12 +291,12 @@ public class Censor {
 	}
 
 	private void addAttachment(final EmbedBuilder eb, final Message message) {
-		List<Message.Attachment> attachments = message.getAttachments();
+		final List<Message.Attachment> attachments = message.getAttachments();
 		if (attachments.size() == 0) {
 			return;
 		}
 
-		Message.Attachment attachment = attachments.get(0);
+		final Message.Attachment attachment = attachments.get(0);
 		if (attachment.isImage()) {
 			eb.setImage(attachment.getProxyUrl());
 		}
