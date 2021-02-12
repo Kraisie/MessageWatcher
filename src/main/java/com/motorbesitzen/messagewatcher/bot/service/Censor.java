@@ -54,7 +54,6 @@ public class Censor {
 
 		final String originalContent = message.getContentRaw();
 		final String censoredContent = censorContent(dcGuild, dcMember, originalContent);
-
 		if (isMessageCensored(originalContent, censoredContent)) {
 			final String warnMessage = originalWarnCount == dcMember.getWarningCount() ?
 					"Avoid censored words/links in the future!" :
@@ -266,16 +265,24 @@ public class Censor {
 	}
 
 	private void tryCensor(final TextChannel channel, final Message message, final EmbedBuilder eb) {
+		final Message repliedMessage = message.getReferencedMessage();
 		try {
 			message.delete().queue(
 					v -> LogUtil.logDebug("Deleted message to censor."),
 					throwable -> LogUtil.logError("Could not delete message!", throwable)
 			);
 
-			channel.sendMessage(eb.build()).queue(
-					v -> LogUtil.logDebug("Sent replacement message."),
-					throwable -> LogUtil.logError("Could not send censored message!", throwable)
-			);
+			if (repliedMessage != null) {
+				repliedMessage.reply(eb.build()).mentionRepliedUser(false).queue(
+						v -> LogUtil.logDebug("Sent replacement message."),
+						throwable -> LogUtil.logError("Could not send censored message!", throwable)
+				);
+			} else {
+				channel.sendMessage(eb.build()).queue(
+						v -> LogUtil.logDebug("Sent replacement message."),
+						throwable -> LogUtil.logError("Could not send censored message!", throwable)
+				);
+			}
 		} catch (InsufficientPermissionException e) {
 			LogUtil.logWarning("Can not censor a message in \"" + channel.getGuild().getName() + "\": " + e.getPermission().getName());
 		} catch (IllegalArgumentException e) {
