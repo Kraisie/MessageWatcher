@@ -44,18 +44,15 @@ public class GuildMessageListener extends ListenerAdapter {
 			return;
 		}
 
-		// check for command prefix
+		// check for command
 		final String prefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
 		final String rawMessage = message.getContentRaw();
-		if (!rawMessage.startsWith(prefix)) {
-			return;
-		}
-
-		// check for command
-		final CommandInfo commandInfo = identifyCommand(prefix, rawMessage);
-		if (commandInfo != CommandInfo.UNKNOWN_COMMAND) {
-			executeCommand(event, commandInfo.getName());
-			return;
+		if (rawMessage.startsWith(prefix)) {
+			final CommandInfo commandInfo = identifyCommand(prefix, rawMessage);
+			if (commandInfo != CommandInfo.UNKNOWN_COMMAND) {
+				executeCommand(event, commandInfo.getName());
+				return;
+			}
 		}
 
 		// handle whitelisted channel

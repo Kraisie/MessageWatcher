@@ -95,9 +95,10 @@ public class Censor {
 	private String censorLine(final DiscordGuild dcGuild, final DiscordMember dcMember, final String line) {
 		final Map<Integer, String> linkMap = new HashMap<>();
 		final Map<Integer, String> wordMap = new HashMap<>();
-		splitLine(line, linkMap, wordMap);
+		final Map<Integer, String> emoteMap = new HashMap<>();
+		splitLine(line, linkMap, wordMap, emoteMap);
 		censorParts(dcGuild, dcMember, linkMap, wordMap);
-		return stitchMessage(linkMap, wordMap);
+		return stitchMessage(linkMap, wordMap, emoteMap);
 	}
 
 	private boolean isLink(final String token) {
@@ -116,12 +117,14 @@ public class Censor {
 		wordMap.put(pos, currentValue + " " + token);
 	}
 
-	private void splitLine(final String line, final Map<Integer, String> linkMap, final Map<Integer, String> wordMap) {
+	private void splitLine(final String line, final Map<Integer, String> linkMap, final Map<Integer, String> wordMap, final Map<Integer, String> emoteMap) {
 		final String[] tokens = line.split(" +");
 		int pos = 0;
 		for (int i = 0; i < tokens.length; i++) {
 			if (isLink(tokens[i])) {
 				linkMap.put(pos, tokens[i]);
+			} else if (isEmote(tokens[i])) {
+				emoteMap.put(pos, tokens[i]);
 			} else {
 				int j = i;
 				do {
@@ -129,12 +132,16 @@ public class Censor {
 					if (++j >= tokens.length) {
 						break;
 					}
-				} while (!isLink(tokens[j]));
+				} while (!isLink(tokens[j]) && !isEmote(tokens[j]));
 				i = j - 1;
 			}
 
 			pos++;
 		}
+	}
+
+	private boolean isEmote(final String token) {
+		return token.matches("<a?:.*:[0-9]{15,20}>");
 	}
 
 	private void censorParts(final DiscordGuild dcGuild, final DiscordMember dcMember, final Map<Integer, String> linkMap, final Map<Integer, String> wordMap) {
@@ -147,12 +154,17 @@ public class Censor {
 		}
 	}
 
-	private String stitchMessage(final Map<Integer, String> linkMap, final Map<Integer, String> wordMap) {
+	private String stitchMessage(final Map<Integer, String> linkMap, final Map<Integer, String> wordMap, final Map<Integer, String> emoteMap) {
 		final StringBuilder sb = new StringBuilder();
-		final int msgSize = linkMap.size() + wordMap.size();
+		final int msgSize = linkMap.size() + wordMap.size() + emoteMap.size();
 		for (int i = 0; i < msgSize; i++) {
 			if (wordMap.get(i) != null) {
 				sb.append(wordMap.get(i)).append(" ");
+				continue;
+			}
+
+			if (emoteMap.get(i) != null) {
+				sb.append(emoteMap.get(i)).append(" ");
 				continue;
 			}
 
