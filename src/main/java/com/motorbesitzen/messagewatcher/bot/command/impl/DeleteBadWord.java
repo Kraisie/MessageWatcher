@@ -7,6 +7,7 @@ import com.motorbesitzen.messagewatcher.data.repo.BadWordRepo;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,19 +46,27 @@ public class DeleteBadWord extends CommandImpl {
 			return;
 		}
 
-		deleteMentionedWords(dcGuild, badWords);
-		answer(event.getChannel(), "Removed the mentioned words from the database.");
+		deleteMentionedWords(event.getChannel(), dcGuild, badWords);
 	}
 
-	private void deleteMentionedWords(final DiscordGuild dcGuild, final List<String> badWords) {
+	private void deleteMentionedWords(final TextChannel channel, final DiscordGuild dcGuild, final List<String> badWords) {
 		for (String badWord : badWords) {
 			if (badWord.isBlank()) {
 				continue;
 			}
 
-			final Optional<BadWord> badWordOpt = badWordRepo.findByWordAndGuild_GuildId(badWord, dcGuild.getGuildId());
-			badWordOpt.ifPresent(badWordRepo::delete);
+			final List<BadWord> badWordMatches = badWordRepo.findByWordAndGuild_GuildId(badWord, dcGuild.getGuildId());
+			if (badWordMatches.size() == 0) {
+				sendErrorMessage(channel, "Word does not exist in database!");
+				return;
+			}
+
+			for (BadWord badWordMatch : badWordMatches) {
+				badWordRepo.delete(badWordMatch);
+			}
 		}
+
+		answer(channel, "Removed the mentioned words from the database.");
 	}
 
 
