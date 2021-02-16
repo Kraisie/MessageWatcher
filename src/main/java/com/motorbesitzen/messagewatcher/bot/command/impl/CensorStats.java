@@ -77,8 +77,8 @@ public class CensorStats extends CommandImpl {
 
 	private NumberFormat generateNumberFormat() {
 		final NumberFormat nf = NumberFormat.getNumberInstance();
-		nf.setMinimumFractionDigits(2);
-		nf.setMaximumFractionDigits(2);
+		nf.setMinimumFractionDigits(4);
+		nf.setMaximumFractionDigits(4);
 		nf.setRoundingMode(RoundingMode.HALF_UP);
 		return nf;
 	}
