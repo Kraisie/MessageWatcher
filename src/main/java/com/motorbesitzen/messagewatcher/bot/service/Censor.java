@@ -97,7 +97,7 @@ public class Censor {
 		final Map<Integer, String> wordMap = new HashMap<>();
 		splitLine(line, linkMap, wordMap);
 		censorParts(dcGuild, dcMember, linkMap, wordMap);
-		return stitchMessage(dcGuild, dcMember, linkMap, wordMap);
+		return stitchMessage(linkMap, wordMap);
 	}
 
 	private boolean isLink(final String token) {
@@ -147,7 +147,7 @@ public class Censor {
 		}
 	}
 
-	private String stitchMessage(final DiscordGuild dcGuild, final DiscordMember dcMember, final Map<Integer, String> linkMap, final Map<Integer, String> wordMap) {
+	private String stitchMessage(final Map<Integer, String> linkMap, final Map<Integer, String> wordMap) {
 		final StringBuilder sb = new StringBuilder();
 		final int msgSize = linkMap.size() + wordMap.size();
 		for (int i = 0; i < msgSize; i++) {

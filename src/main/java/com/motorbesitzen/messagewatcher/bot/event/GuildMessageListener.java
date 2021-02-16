@@ -44,9 +44,15 @@ public class GuildMessageListener extends ListenerAdapter {
 			return;
 		}
 
-		// check for command
+		// check for command prefix
+		final String prefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
 		final String rawMessage = message.getContentRaw();
-		final CommandInfo commandInfo = identifyCommand(rawMessage);
+		if (!rawMessage.startsWith(prefix)) {
+			return;
+		}
+
+		// check for command
+		final CommandInfo commandInfo = identifyCommand(prefix, rawMessage);
 		if (commandInfo != CommandInfo.UNKNOWN_COMMAND) {
 			executeCommand(event, commandInfo.getName());
 			return;
@@ -76,8 +82,7 @@ public class GuildMessageListener extends ListenerAdapter {
 		return channelRepo.existsById(channelId);
 	}
 
-	private CommandInfo identifyCommand(final String rawMessage) {
-		final String cmdPrefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
+	private CommandInfo identifyCommand(final String cmdPrefix, final String rawMessage) {
 		final String commandName = identifyCommandName(cmdPrefix, rawMessage);
 		return CommandInfo.getCommandInfoByName(commandName);
 	}
