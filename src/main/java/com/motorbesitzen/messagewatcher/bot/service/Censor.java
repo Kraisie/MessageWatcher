@@ -324,12 +324,18 @@ public class Censor {
 
 	private void tryKick(final Guild guild, final DiscordGuild dcGuild, final DiscordMember dcMember) throws HierarchyException {
 		guild.retrieveMemberById(dcMember.getDiscordId()).queue(
-				member -> member.kick("Kicked for reaching " + dcGuild.getCensorKickThreshold() +
-						" censor infractions (infractions: " + dcMember.getWarningCount() + ")!").queue(
-						v -> LogUtil.logInfo("Kicked " + member.getUser().getAsTag() + " for reaching the censor limit of guild " + guild.getName()),
-						throwable -> LogUtil.logDebug("Could not kick " + member.getUser().getAsTag() + " for reaching the " +
-								"censor limit of guild \"" + guild.getName(), throwable)
-				),
+				member -> {
+					if (guild.getSelfMember().canInteract(member)) {
+						member.kick("Kicked for reaching " + dcGuild.getCensorKickThreshold() +
+								" censor infractions (infractions: " + dcMember.getWarningCount() + ")!").queue(
+								v -> LogUtil.logInfo("Kicked " + member.getUser().getAsTag() + " for reaching the censor limit of guild " + guild.getName()),
+								throwable -> LogUtil.logDebug("Could not kick " + member.getUser().getAsTag() + " for reaching the " +
+										"censor limit of guild \"" + guild.getName(), throwable)
+						);
+					} else {
+						LogUtil.logDebug("Can not interact (censor kick) with " + member.getUser().getAsTag() + " (" + member.getId() + ").");
+					}
+				},
 				throwable -> LogUtil.logDebug("Could not retrieve author to kick for censor.", throwable)
 		);
 	}
