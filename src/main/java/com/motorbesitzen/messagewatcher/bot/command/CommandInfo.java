@@ -76,6 +76,23 @@ public enum CommandInfo {
 			return "Whitelists a channel so the bot does not censor any messages in there. Can be used with " +
 					"multiple channels.";
 		}
+	}, ANNOUNCE {
+		@Override
+		public String getName() {
+			return "announce";
+		}
+
+		@Override
+		public String getUsage() {
+			return getName() + " (everyone|here|@role) #channel \"message\"";
+		}
+
+		@Override
+		public String getDescription() {
+			return "Sends a message in the tagged channel pinging @everyone, @here or a tagged role. " +
+					"Avoiding pings can be done by not using everyone, here or a role tag. Providing " +
+					"multiple role tags will only ping the first one.";
+		}
 	}, CENSOR_STATS {
 		@Override
 		public String getName() {
