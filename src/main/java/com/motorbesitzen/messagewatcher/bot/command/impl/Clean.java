@@ -42,7 +42,11 @@ public class Clean extends CommandImpl {
 							answer(channelCopy, "FIRST!!!");
 							updateWhitelist(mentionedChannel, channelCopy);
 							mentionedChannel.delete().queue(
-									v -> LogUtil.logDebug("Cleaned channel " + mentionedChannel.getName()),
+									v -> {
+										if (!mentionedChannel.equals(callerChannel)) {
+											answer(callerChannel, "Cleaned #" + mentionedChannel.getName());
+										}
+									},
 									throwable -> {
 										answer(callerChannel, "Could not delete the mentioned channel!");
 										LogUtil.logError(
