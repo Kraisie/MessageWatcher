@@ -123,6 +123,21 @@ public enum CommandInfo {
 		public String getDescription() {
 			return "Sets the amount of censors of punishable words that triggers a kick of a user.";
 		}
+	}, CLEAN {
+		@Override
+		public String getName() {
+			return "clean";
+		}
+
+		@Override
+		public String getUsage() {
+			return getName() + " #channel";
+		}
+
+		@Override
+		public String getDescription() {
+			return "Cleans a channel by creating a copy of the channel and deleting the original channel.";
+		}
 	}, DEL_BAD_WORD {
 		@Override
 		public String getName() {
