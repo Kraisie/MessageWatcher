@@ -36,7 +36,6 @@ public class Clean extends CommandImpl {
 		final TextChannel mentionedChannel = mentionedChannels.get(0);
 		mentionedChannel.createCopy()
 				.setPosition(mentionedChannel.getPosition())
-				.setSlowmode(mentionedChannel.getSlowmode())
 				.setNews(mentionedChannel.isNews())
 				.queue(
 						channelCopy -> {
