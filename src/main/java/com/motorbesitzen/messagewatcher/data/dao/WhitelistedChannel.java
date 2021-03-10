@@ -35,6 +35,10 @@ public class WhitelistedChannel {
 		return guild;
 	}
 
+	public void setChannelId(long channelId) {
+		this.channelId = channelId;
+	}
+
 	public void setGuild(DiscordGuild guild) {
 		this.guild = guild;
 	}

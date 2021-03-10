@@ -1,16 +1,27 @@
 package com.motorbesitzen.messagewatcher.bot.command.impl;
 
 import com.motorbesitzen.messagewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.messagewatcher.data.dao.WhitelistedChannel;
+import com.motorbesitzen.messagewatcher.data.repo.WhitelistedChannelRepo;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service("clean")
 public class Clean extends CommandImpl {
+
+	private final WhitelistedChannelRepo channelRepo;
+
+	@Autowired
+	public Clean(WhitelistedChannelRepo channelRepo) {
+		this.channelRepo = channelRepo;
+	}
 
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {
@@ -23,27 +34,45 @@ public class Clean extends CommandImpl {
 		}
 
 		final TextChannel mentionedChannel = mentionedChannels.get(0);
-		mentionedChannel.createCopy().setPosition(mentionedChannel.getPosition()).queue(
-				channelCopy -> {
-					answer(channelCopy, "FIRST!!!");
-					mentionedChannel.delete().queue(
-							v -> LogUtil.logDebug("Cleaned channel " + mentionedChannel.getName()),
-							throwable -> {
-								answer(callerChannel, "Could not create a copy of the mentioned channel!");
-								LogUtil.logError(
-										"Could not delete channel in \"" +
-												mentionedChannel.getGuild().getName() + "\"!", throwable
-								);
-							}
-					);
-				},
-				throwable -> {
-					answer(callerChannel, "Could not create a copy of the mentioned channel!");
-					LogUtil.logError(
-							"Could not create a copy of " + mentionedChannel.getName() +
-									" in \"" + mentionedChannel.getGuild().getName() + "\"!", throwable
-					);
-				}
-		);
+		mentionedChannel.createCopy()
+				.setPosition(mentionedChannel.getPosition())
+				.setSlowmode(mentionedChannel.getSlowmode())
+				.setNews(mentionedChannel.isNews())
+				.queue(
+						channelCopy -> {
+							answer(channelCopy, "FIRST!!!");
+							updateWhitelist(mentionedChannel, channelCopy);
+							mentionedChannel.delete().queue(
+									v -> LogUtil.logDebug("Cleaned channel " + mentionedChannel.getName()),
+									throwable -> {
+										answer(callerChannel, "Could not delete the mentioned channel!");
+										LogUtil.logError(
+												"Could not delete channel in \"" +
+														mentionedChannel.getGuild().getName() + "\"!", throwable
+										);
+									}
+							);
+						},
+						throwable -> {
+							answer(callerChannel, "Could not create a copy of the mentioned channel!");
+							LogUtil.logError(
+									"Could not create a copy of " + mentionedChannel.getName() +
+											" in \"" + mentionedChannel.getGuild().getName() + "\"!", throwable
+							);
+						}
+				);
+	}
+
+	private void updateWhitelist(final TextChannel originalChannel, final TextChannel copyChannel) {
+		final long originalChannelId = originalChannel.getIdLong();
+		final long guildId = originalChannel.getGuild().getIdLong();
+		final Optional<WhitelistedChannel> whitelistedChannelOpt = channelRepo.findByChannelIdAndGuild_GuildId(originalChannelId, guildId);
+		if (whitelistedChannelOpt.isEmpty()) {
+			return;
+		}
+
+		final WhitelistedChannel whitelistedChannel = whitelistedChannelOpt.get();
+		whitelistedChannel.setChannelId(copyChannel.getIdLong());
+		channelRepo.save(whitelistedChannel);
 	}
 }
