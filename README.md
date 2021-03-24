@@ -191,6 +191,19 @@ stop the program as described in the same section. Now remove the line you added
 Your database is now set up, and you can start and stop the program as you like. However, do not add the line back
 to `.env` as that will lead to the program creating the database again and thus deleting all your data!
 
+#### Update
+
+If you need to update the database at some point add the following line to the `.env` file:
+
+```dotenv
+SPRING_PROFILES_ACTIVE=updatedb
+```
+
+Afterwards start the bot as described in
+[starting and stopping the bot](#starting-and-stopping-the-bot). Wait until the bot is shown as online in Discord and
+stop the program as described in the same section. Now remove the line you added to the `.env` file. \
+Your database schema is now updated and you can start the bot like normal.
+
 ## Starting and stopping the bot
 
 To start the bot you can just run the provided `start.sh` file like this:
@@ -233,28 +246,23 @@ You do not need to understand anything below to use this program.
 
 ### Profiles
 
-This program currently offers two profiles. The default profile, and a developer profile called "dev" which has debug
-outputs and other features that make developing and debugging easier. To change the profile open the `.env` file and add
-the following line:
+This program currently offers a few profiles. The default profile (production), and the developer profile called "dev"
+are probably the most important ones. The debug profile has debug outputs and other features that make developing and
+debugging easier. To change the profile to the developer profile open the `.env` file and add the following line:
 
 ```dotenv
 SPRING_PROFILES_ACTIVE=dev
 ```
 
-If you want to use the H2 web console you need to add the following dependency to the `build.gradle`:
-
-```
-implementation 'org.springframework.boot:spring-boot-starter-web'
-```
+The same effect can be achieved by changing the run configuration of your IDE to use that profile.
 
 The database creation process in the `dev` profile will try to import a file called `data.sql` in the `resources` folder
 on startup. It will crash if that file is not present so either disable the auto import in `application.yml` or create
 the file yourself. The file can be used for sample data.
 
-### Adding commands and event listeners
+### Adding commands
 
-To add a command to the bot there are a few steps to perform. First add a new entry to the `CommandInfo` class. The next
-step is to create the command class in
+To add a command to the bot there are a few steps to perform. First create the command class in
 `com.motorbesitzen.rolewatcher.bot.command.impl`. The command class needs to extend `CommandImpl`. The command needs to
 be a `@Service` and needs to have its command set as a value in lowercase. So a command like `help` would be the
 following:
@@ -267,7 +275,13 @@ public class Help extends CommandImpl {
 }
 ```
 
-The same applies for event listeners although they do not need a name and thus no value:
+Your IDE or the compiler should notify you about the methods you need to implement for a command to function.
+
+### Adding event listeners
+
+Event listeners do not need a name and thus no special value. Just annotate the listener class as a service and make
+sure it extends the `ListenerAdapter`. Override at least one of the `ListenerAdapter` methods so your event listener
+actually does something.
 
 ```java
 
