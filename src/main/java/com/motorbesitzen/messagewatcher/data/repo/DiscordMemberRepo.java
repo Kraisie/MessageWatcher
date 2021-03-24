@@ -42,4 +42,11 @@ public interface DiscordMemberRepo extends CrudRepository<DiscordMember, Long> {
 			"order by ((cast(d.wordCensorCount as double) + cast(d.linkCensorCount as double)) / cast(d.messageCount as double)) desc, d.messageCount desc")
 	List<DiscordMember> findAllByGuild_GuildIdOrderByCensorsPerMessage(long guildId, Pageable pageable);
 
+	@Query("select d " +
+			"from DiscordMember d " +
+			"where d.guild.guildId = ?1 and d.messageCount > 25 " +
+			"order by d.messageCount desc")
+	List<DiscordMember> findAllByGuild_GuildIdOrderByMessageCount(long guildId, Pageable pageable);
+
+
 }

@@ -34,7 +34,7 @@ class TopList extends CommandImpl {
 
 	@Override
 	public String getUsage() {
-		return getName() + " \"(word|link|rating|warn|cpm)\" (1-25)";
+		return getName() + " \"(word|link|rating|warn|cpm|msg)\" (1-25)";
 	}
 
 	@Override
@@ -70,6 +70,8 @@ class TopList extends CommandImpl {
 				return memberRepo.findAllByGuild_GuildIdOrderByWarningCountDesc(guildId, pageRequest);
 			case "cpm":
 				return memberRepo.findAllByGuild_GuildIdOrderByCensorsPerMessage(guildId, pageRequest);
+			case "msg":
+				return memberRepo.findAllByGuild_GuildIdOrderByMessageCount(guildId, pageRequest);
 			case "word":
 			default:
 				return memberRepo.findAllByGuild_GuildIdOrderByWordCensorCountDesc(guildId, pageRequest);
