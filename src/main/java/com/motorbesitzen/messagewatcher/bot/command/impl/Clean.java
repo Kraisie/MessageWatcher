@@ -14,13 +14,29 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("clean")
-public class Clean extends CommandImpl {
+class Clean extends CommandImpl {
 
 	private final WhitelistedChannelRepo channelRepo;
 
 	@Autowired
-	public Clean(WhitelistedChannelRepo channelRepo) {
+	Clean(WhitelistedChannelRepo channelRepo) {
 		this.channelRepo = channelRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "clean";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " #channel";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Cleans a channel by creating a copy of the channel and deleting the original channel. " +
+				"Thus preventing famous message log plugins from logging deleted messages.";
 	}
 
 	@Override

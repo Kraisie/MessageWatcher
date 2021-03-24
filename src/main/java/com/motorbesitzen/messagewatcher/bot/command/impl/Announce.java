@@ -15,7 +15,24 @@ import java.util.Optional;
  * Command to send an announcement via the bot in a specific channel.
  */
 @Service("announce")
-public class Announce extends CommandImpl {
+class Announce extends CommandImpl {
+
+	@Override
+	public String getName() {
+		return "announce";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " (everyone|here|@role) #channel \"message\"";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Sends a message in the tagged channel pinging @everyone, @here or a tagged role. " +
+				"Avoiding pings can be done by not using everyone, here or a role tag. Providing " +
+				"multiple role tags will only ping the first one.";
+	}
 
 	/**
 	 * Sends an announcement in a given channel. Can optionally tag roles, everyone or here.

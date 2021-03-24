@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("bw")
-public class ListBadWords extends CommandImpl {
+class ListBadWords extends CommandImpl {
 
 	private static final int FIELDS_PER_EMBED = 25;
 	private final DiscordGuildRepo guildRepo;
@@ -23,6 +23,21 @@ public class ListBadWords extends CommandImpl {
 	@Autowired
 	public ListBadWords(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "bw";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getDescription() {
+		return "Lists all bad words for this guild.";
 	}
 
 	@Transactional

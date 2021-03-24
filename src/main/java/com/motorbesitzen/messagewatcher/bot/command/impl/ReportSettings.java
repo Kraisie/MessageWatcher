@@ -16,13 +16,29 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("reportsettings")
-public class ReportSettings extends CommandImpl {
+class ReportSettings extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public ReportSettings(final DiscordGuildRepo guildRepo) {
+	ReportSettings(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "reportsettings";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + "emote threshold #channel";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Sets the report emote to the used emote, the report threshold to the given value and the " +
+				"report channel to the mentioned channel. Not setting a value will reset the value.";
 	}
 
 	@Override

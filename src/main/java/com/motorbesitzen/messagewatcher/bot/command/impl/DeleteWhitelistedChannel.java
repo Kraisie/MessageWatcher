@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("delwhitelist")
-public class DeleteWhitelistedChannel extends CommandImpl {
+class DeleteWhitelistedChannel extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 	private final WhitelistedChannelRepo channelRepo;
@@ -25,6 +25,21 @@ public class DeleteWhitelistedChannel extends CommandImpl {
 	public DeleteWhitelistedChannel(final DiscordGuildRepo guildRepo, final WhitelistedChannelRepo channelRepo) {
 		this.guildRepo = guildRepo;
 		this.channelRepo = channelRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "delwhitelist";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " #channel+";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Removes the whitelist status of a channel. Can be used with multiple roles.";
 	}
 
 	@Transactional

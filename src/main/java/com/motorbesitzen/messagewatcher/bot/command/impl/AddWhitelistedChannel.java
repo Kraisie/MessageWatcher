@@ -15,13 +15,29 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("whitelist")
-public class AddWhitelistedChannel extends CommandImpl {
+class AddWhitelistedChannel extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
 	public AddWhitelistedChannel(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "whitelist";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " #channel+";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Whitelists a channel so the bot does not censor any messages in there. Can be used with " +
+				"multiple channels.";
 	}
 
 	@Transactional

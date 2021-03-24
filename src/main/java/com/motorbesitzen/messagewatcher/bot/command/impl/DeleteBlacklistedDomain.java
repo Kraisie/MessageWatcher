@@ -15,15 +15,30 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("deldomain")
-public class DeleteBlacklistedDomain extends CommandImpl {
+class DeleteBlacklistedDomain extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 	private final BlacklistedDomainRepo domainRepo;
 
 	@Autowired
-	public DeleteBlacklistedDomain(DiscordGuildRepo guildRepo, BlacklistedDomainRepo domainRepo) {
+	DeleteBlacklistedDomain(DiscordGuildRepo guildRepo, BlacklistedDomainRepo domainRepo) {
 		this.guildRepo = guildRepo;
 		this.domainRepo = domainRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "deldomain";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " \"domain\"+";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Deletes a domain from the blacklist. Can be used with multiple domains.";
 	}
 
 	@Override

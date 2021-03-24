@@ -18,13 +18,31 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 @Service("addbw")
-public class AddBadWord extends CommandImpl {
+class AddBadWord extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
 	public AddBadWord(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "addbw";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " \"word\" \"replacement\" \"(true|false)\" \"(true|false)\"";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Adds a bad word to the database. A blank (\"\") replacement " +
+				"defaults to \"\\*\\*\\*\". The wildcard flag is also optional and " +
+				"defaults to false if blank. The last option marks the word as punishable " +
+				"so a user will get kicked if he uses it x times. Word supports (Java escaped) regex.";
 	}
 
 	@Transactional

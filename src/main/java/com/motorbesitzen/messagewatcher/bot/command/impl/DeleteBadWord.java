@@ -16,15 +16,30 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("delbw")
-public class DeleteBadWord extends CommandImpl {
+class DeleteBadWord extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 	private final BadWordRepo badWordRepo;
 
 	@Autowired
-	public DeleteBadWord(DiscordGuildRepo guildRepo, BadWordRepo badWordRepo) {
+	DeleteBadWord(DiscordGuildRepo guildRepo, BadWordRepo badWordRepo) {
 		this.guildRepo = guildRepo;
 		this.badWordRepo = badWordRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "delbw";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " \"word\"+";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Deletes a bad word from the database. Can be used with multiple words.";
 	}
 
 	@Override

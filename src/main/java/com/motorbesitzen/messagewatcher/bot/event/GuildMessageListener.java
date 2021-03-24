@@ -1,7 +1,6 @@
 package com.motorbesitzen.messagewatcher.bot.event;
 
 import com.motorbesitzen.messagewatcher.bot.command.Command;
-import com.motorbesitzen.messagewatcher.bot.command.CommandInfo;
 import com.motorbesitzen.messagewatcher.bot.service.Censor;
 import com.motorbesitzen.messagewatcher.data.repo.ModRoleRepo;
 import com.motorbesitzen.messagewatcher.data.repo.WhitelistedChannelRepo;
@@ -48,9 +47,9 @@ public class GuildMessageListener extends ListenerAdapter {
 		final String prefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
 		final String rawMessage = message.getContentRaw();
 		if (rawMessage.startsWith(prefix)) {
-			final CommandInfo commandInfo = identifyCommand(prefix, rawMessage);
-			if (commandInfo != CommandInfo.UNKNOWN_COMMAND) {
-				executeCommand(event, commandInfo.getName());
+			final Command command = identifyCommand(prefix, rawMessage);
+			if (command != null) {
+				executeCommand(event, command);
 				return;
 			}
 		}
@@ -79,9 +78,9 @@ public class GuildMessageListener extends ListenerAdapter {
 		return channelRepo.existsById(channelId);
 	}
 
-	private CommandInfo identifyCommand(final String cmdPrefix, final String rawMessage) {
+	private Command identifyCommand(final String cmdPrefix, final String rawMessage) {
 		final String commandName = identifyCommandName(cmdPrefix, rawMessage);
-		return CommandInfo.getCommandInfoByName(commandName);
+		return commandMap.get(commandName);
 	}
 
 	private String identifyCommandName(final String cmdPrefix, final String messageContent) {
@@ -95,15 +94,14 @@ public class GuildMessageListener extends ListenerAdapter {
 	 * Executes a command and handles exception if the bot does not have the needed permissions to
 	 * execute that command in the channel/guild.
 	 *
-	 * @param event       The GuildMessageReceivedEvent provided by JDA.
-	 * @param commandName The name of the command in lower case.
+	 * @param event   The GuildMessageReceivedEvent provided by JDA.
+	 * @param command The command to execute.
 	 */
-	private void executeCommand(final GuildMessageReceivedEvent event, final String commandName) {
+	private void executeCommand(final GuildMessageReceivedEvent event, final Command command) {
 		if (!isAuthorizedMember(event.getMember())) {
 			return;
 		}
 
-		final Command command = commandMap.get(commandName);    // commandName is already lower case and a confirmed match
 		try {
 			command.execute(event);
 		} catch (InsufficientPermissionException e) {

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("delmod")
-public class DeleteModRole extends CommandImpl {
+class DeleteModRole extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 	private final ModRoleRepo roleRepo;
@@ -25,6 +25,21 @@ public class DeleteModRole extends CommandImpl {
 	public DeleteModRole(final DiscordGuildRepo guildRepo, final ModRoleRepo roleRepo) {
 		this.guildRepo = guildRepo;
 		this.roleRepo = roleRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "delmod";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " @role+";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Deletes a mod role from the database. Can be used with multiple roles.";
 	}
 
 	@Transactional

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("domains")
-public class ListBlacklistedDomains extends CommandImpl {
+class ListBlacklistedDomains extends CommandImpl {
 
 	private static final int FIELDS_PER_EMBED = 25;
 	private final DiscordGuildRepo guildRepo;
@@ -23,6 +23,21 @@ public class ListBlacklistedDomains extends CommandImpl {
 	@Autowired
 	public ListBlacklistedDomains(DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "domains";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getDescription() {
+		return "Lists all blacklisted domains for this guild.";
 	}
 
 	@Transactional

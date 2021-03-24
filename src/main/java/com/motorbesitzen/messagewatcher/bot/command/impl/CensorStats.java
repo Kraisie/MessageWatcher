@@ -17,13 +17,28 @@ import java.text.NumberFormat;
 import java.util.Optional;
 
 @Service("stats")
-public class CensorStats extends CommandImpl {
+class CensorStats extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 
 	@Autowired
-	public CensorStats(final DiscordMemberRepo memberRepo) {
+	CensorStats(final DiscordMemberRepo memberRepo) {
 		this.memberRepo = memberRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "stats";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " (@user|discordid)";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Displays the censor stats of the given user.";
 	}
 
 	@Override

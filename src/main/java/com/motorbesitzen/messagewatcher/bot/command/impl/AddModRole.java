@@ -24,6 +24,22 @@ public class AddModRole extends CommandImpl {
 		this.guildRepo = guildRepo;
 	}
 
+	@Override
+	public String getName() {
+		return "addmod";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " @role+";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Adds a role that can use the bot commands even without administrator permissions. Can be used with " +
+				"multiple roles.";
+	}
+
 	@Transactional
 	@Override
 	public void execute(final GuildMessageReceivedEvent event) {

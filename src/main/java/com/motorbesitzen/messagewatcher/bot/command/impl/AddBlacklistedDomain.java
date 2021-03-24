@@ -15,13 +15,29 @@ import java.util.List;
 import java.util.Optional;
 
 @Service("blacklistdomain")
-public class AddBlacklistedDomain extends CommandImpl {
+class AddBlacklistedDomain extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
 	public AddBlacklistedDomain(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "blacklistdomain";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " \"domain\"+";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Adds a domain to the blacklist. Any domain on the blacklist will get censored. Can be used with " +
+				"multiple domains.";
 	}
 
 	@Transactional

@@ -20,13 +20,28 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service("info")
-public class Info extends CommandImpl {
+class Info extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
 	public Info(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "info";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName();
+	}
+
+	@Override
+	public String getDescription() {
+		return "Lists all whitelisted channels and all mod roles.";
 	}
 
 	@Override

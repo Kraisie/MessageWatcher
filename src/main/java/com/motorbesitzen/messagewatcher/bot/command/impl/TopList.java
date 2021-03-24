@@ -18,13 +18,30 @@ import java.text.NumberFormat;
 import java.util.List;
 
 @Service("top")
-public class TopList extends CommandImpl {
+class TopList extends CommandImpl {
 
 	private final DiscordMemberRepo memberRepo;
 
 	@Autowired
-	public TopList(final DiscordMemberRepo memberRepo) {
+	TopList(final DiscordMemberRepo memberRepo) {
 		this.memberRepo = memberRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "top";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " \"(word|link|rating|warn|cpm)\" (1-25)";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Displays the users with the highest censor count in one of the categories. Can display up to 25 users. " +
+				"Defaults to a list of 10 users if no valid range is set and is ordered by censored words if no category " +
+				"is set.";
 	}
 
 	@Override

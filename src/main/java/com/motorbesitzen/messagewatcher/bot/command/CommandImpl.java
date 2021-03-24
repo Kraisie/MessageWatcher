@@ -1,6 +1,5 @@
 package com.motorbesitzen.messagewatcher.bot.command;
 
-import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -12,18 +11,35 @@ import org.springframework.stereotype.Service;
  * All subclasses (Commands) can use these functions.
  */
 @Service
-public class CommandImpl implements Command {
+public abstract class CommandImpl implements Command {
 
 	/**
 	 * {@inheritDoc}
-	 * Placeholder for subclass implementation, does not do anything as this class is not a command which the bot
-	 * handles.
+	 * Default command implementation without command functionality. Declared as 'unknown command'.
 	 */
 	@Override
-	public void execute(final GuildMessageReceivedEvent event) {
-		// Perform tasks in subclasses, not here!
-		LogUtil.logDebug("Tried to execute base command!");
-	}
+	public abstract String getName();
+
+	/**
+	 * {@inheritDoc}
+	 * Default command implementation without command functionality. Declared as 'unknown command'.
+	 */
+	@Override
+	public abstract String getUsage();
+
+	/**
+	 * {@inheritDoc}
+	 * Default command implementation without command functionality. Declared as 'unknown command'.
+	 */
+	@Override
+	public abstract String getDescription();
+
+	/**
+	 * {@inheritDoc}
+	 * Default command implementation without command functionality. Declared as 'unknown command'.
+	 */
+	@Override
+	public abstract void execute(final GuildMessageReceivedEvent event);
 
 	/**
 	 * {@inheritDoc}

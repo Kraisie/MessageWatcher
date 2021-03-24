@@ -11,13 +11,28 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service("censorsettings")
-public class CensorSettings extends CommandImpl {
+class CensorSettings extends CommandImpl {
 
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public CensorSettings(final DiscordGuildRepo guildRepo) {
+	CensorSettings(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
+	}
+
+	@Override
+	public String getName() {
+		return "censorsettings";
+	}
+
+	@Override
+	public String getUsage() {
+		return getName() + " punishableCensorsToKick";
+	}
+
+	@Override
+	public String getDescription() {
+		return "Sets the amount of censors of punishable words that triggers a kick of a user.";
 	}
 
 	@Override
