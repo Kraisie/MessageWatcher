@@ -3,9 +3,6 @@
 This is a Discord bot which censors messages with specific words or links it instead of deleting them completely like
 other bots.
 
-To add a running version of this bot to your server use the following link:
-https://discord.com/api/oauth2/authorize?client_id=804052505804800050&permissions=388160&scope=bot
-
 ## Setup
 
 This section only applies if you want to host the bot yourself. The following text is written for linux based systems.
