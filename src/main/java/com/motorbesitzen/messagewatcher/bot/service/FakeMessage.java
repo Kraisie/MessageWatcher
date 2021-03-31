@@ -43,7 +43,7 @@ public class FakeMessage {
 			"guys please subscribe to my tiktok and like and share! https://www.tiktok.com/@vinnymcflyboi",
 			"Are you England",
 			"Anyone have number of Ehlon? I need to contact for date",
-			"who is belle delphine? \u1F914\nin math: my solution \u1F522\nin history: my quuen \u1F451\nin art: my canvas \u1F3A8\nin science: my oxygen \u1F32C\nin geography: my world \u1F30D",
+			"who is belle delphine? :thinking:\nin math: my solution :1234:\nin history: my quuen :crown:\nin art: my canvas :art:\nin science: my oxygen :wind_blowing_face:\nin geography: my world :earth_africa:",
 			"I have information that leads to the arrest of LogixX!",
 			"haha u so funny",
 			"who wants to talk anime tiddies?",
