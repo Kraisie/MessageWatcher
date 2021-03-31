@@ -104,8 +104,8 @@ public class FakeMessage {
 	private String shuffleMessage() {
 		final String original = message.getContentRaw();
 		String[] originalTokens = original.split(" ");
-		if (originalTokens.length <= 1) {
-			return shuffleWord(original);
+		if (originalTokens.length <= 3) {
+			return shuffleWords(originalTokens);
 		}
 
 		for (int i = originalTokens.length - 1; i > 0; i--) {
@@ -129,18 +129,22 @@ public class FakeMessage {
 		return shuffledMessage;
 	}
 
-	private String shuffleWord(final String message) {
-		final char[] messageChars = message.toCharArray();
-		for (int i = messageChars.length - 1; i > 0; i--) {
-			int index = random.nextInt(i + 1);
-			char c = messageChars[index];
-			messageChars[index] = messageChars[i];
-			messageChars[i] = c;
-		}
-
+	private String shuffleWords(final String[] tokens) {
 		final StringBuilder sb = new StringBuilder();
-		for (char c : messageChars) {
-			sb.append(c);
+		for (String token : tokens) {
+			final char[] messageChars = token.toCharArray();
+			for (int i = messageChars.length - 1; i > 0; i--) {
+				int index = random.nextInt(i + 1);
+				char c = messageChars[index];
+				messageChars[index] = messageChars[i];
+				messageChars[i] = c;
+			}
+
+			for (char c : messageChars) {
+				sb.append(c);
+			}
+
+			sb.append(" ");
 		}
 
 		return sb.toString();
