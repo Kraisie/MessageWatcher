@@ -85,11 +85,13 @@ public class FakeMessage {
 
 	private String getRandomMessage() {
 		final double methodChoice = random.nextDouble();
-		if (methodChoice <= 0.3) {
+		if (methodChoice <= 0.25) {
 			final int index = random.nextInt(MESSAGES.length);
 			return MESSAGES[index];
-		} else if (methodChoice <= 0.6) {
+		} else if (methodChoice <= 0.5) {
 			return shuffleMessage();
+		} else if (methodChoice <= 0.6) {
+			return annoyXeon();
 		} else if (methodChoice <= 0.7) {
 			return getRandomInsult();
 		} else if (methodChoice <= 0.8) {
@@ -177,6 +179,10 @@ public class FakeMessage {
 
 	private String annoyLogixX() {
 		return "<@315139295201460234> help";
+	}
+
+	private String annoyXeon() {
+		return "<@208709204385595402> help";
 	}
 
 	void replaceMessage() {
