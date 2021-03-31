@@ -148,14 +148,18 @@ public class FakeMessage {
 
 	private String getRandomInsult() {
 		final List<Message> lastMessages = message.getTextChannel().getHistory().retrievePast(10).complete();
-		final List<Message> sameAuthor = new ArrayList<>();
+		final List<Message> invalidSender = new ArrayList<>();
 		for (Message lastMessage : lastMessages) {
 			if (lastMessage.getAuthor().getIdLong() == message.getAuthor().getIdLong()) {
-				sameAuthor.add(lastMessage);
+				invalidSender.add(lastMessage);
+			}
+
+			if (lastMessage.isWebhookMessage()) {
+				invalidSender.add(lastMessage);
 			}
 		}
 
-		lastMessages.removeAll(sameAuthor);
+		lastMessages.removeAll(invalidSender);
 		if (lastMessages.size() == 0) {
 			return "haha I am dumb";
 		}
