@@ -31,12 +31,15 @@ select your application. Now switch to the "OAuth2" tab on the left and in the l
 down and select all needed permissions:
 
 ```text
+Kick Members
+Manage Webhooks
 View Channels
 Send Messages
 Manage Messages
 Embed Links
 Attach Files
 Read Message History
+Mention everyone
 Use External Emojis
 Add Reactions
 ```
