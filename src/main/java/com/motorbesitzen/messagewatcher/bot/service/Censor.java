@@ -1,5 +1,7 @@
 package com.motorbesitzen.messagewatcher.bot.service;
 
+import club.minnced.discord.webhook.WebhookClient;
+import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.motorbesitzen.messagewatcher.data.dao.BadWord;
 import com.motorbesitzen.messagewatcher.data.dao.BlacklistedDomain;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
@@ -9,10 +11,7 @@ import com.motorbesitzen.messagewatcher.data.repo.DiscordMemberRepo;
 import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,14 +54,14 @@ public class Censor {
 		final String originalContent = message.getContentRaw();
 		final String censoredContent = censorContent(dcGuild, dcMember, originalContent);
 		if (isMessageCensored(originalContent, censoredContent)) {
-			final String warnMessage = originalWarnCount == dcMember.getWarningCount() ?
-					"Avoid censored words/links in the future!" :
-					"You have used a kickable word. Be aware that further usage will be punished!";
-			replaceMessage(message, censoredContent, warnMessage);
-		}
-
-		if (dcGuild.getCensorKickThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() && dcMember.getWarningCount() >= dcGuild.getCensorKickThreshold()) {
-			kickMember(guild, dcGuild, dcMember);
+			if (originalWarnCount == dcMember.getWarningCount()) {
+				replaceMessageWebhook(message, censoredContent);
+			} else {
+				replaceMessageEmbed(message, censoredContent, "You have used a kickable word. Be aware that further usage will be punished!");
+				if (dcGuild.getCensorKickThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() && dcMember.getWarningCount() >= dcGuild.getCensorKickThreshold()) {
+					kickMember(guild, dcGuild, dcMember);
+				}
+			}
 		}
 
 		memberRepo.save(dcMember);
@@ -257,7 +256,44 @@ public class Censor {
 		return !originalNoFormat.equalsIgnoreCase(resultNoFormat);
 	}
 
-	private void replaceMessage(final Message message, final String newMessage, final String warnMessage) {
+	private void replaceMessageWebhook(final Message message, final String newMessage) {
+		final TextChannel channel = message.getTextChannel();
+		final Member author = message.getMember();
+		if (author == null) {
+			message.delete().queue();
+			return;
+		}
+
+		channel.retrieveWebhooks().queue(
+				webhooks -> {
+					if (webhooks.size() == 0) {
+						channel.createWebhook("censor").queue(
+								fakeWebhook -> message.delete().queue(
+										v -> sendWebhookMessage(fakeWebhook, author, newMessage),
+										throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!")
+								)
+						);
+					} else {
+						message.delete().queue(
+								v -> sendWebhookMessage(webhooks.get(0), author, newMessage),
+								throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!")
+						);
+					}
+				}
+		);
+	}
+
+	private void sendWebhookMessage(final Webhook fakeWebhook, final Member author, final String newMessage) {
+		final WebhookClient client = WebhookClient.withUrl(fakeWebhook.getUrl());
+		final WebhookMessageBuilder builder = new WebhookMessageBuilder();
+		builder.setUsername(author.getEffectiveName());
+		builder.setAvatarUrl(author.getUser().getEffectiveAvatarUrl());
+		builder.setContent(getWrappedMessage(newMessage));
+		client.send(builder.build());
+		client.close();
+	}
+
+	private void replaceMessageEmbed(final Message message, final String newMessage, final String warnMessage) {
 		final TextChannel channel = message.getTextChannel();
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(DiscordMessageUtil.getEmbedColor());
