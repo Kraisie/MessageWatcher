@@ -158,7 +158,7 @@ public class FakeMessage {
 				invalidSender.add(lastMessage);
 			}
 
-			if (lastMessage.isWebhookMessage()) {
+			if (lastMessage.isWebhookMessage() || lastMessage.getAuthor().isBot()) {
 				invalidSender.add(lastMessage);
 			}
 		}
