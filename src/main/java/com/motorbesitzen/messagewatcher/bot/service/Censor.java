@@ -264,18 +264,24 @@ public class Censor {
 			return;
 		}
 
+		final Message repliedMessage = message.getReferencedMessage();
+		final String newReply =
+				repliedMessage != null ?
+						repliedMessage.getAuthor().getAsMention() + "\n" + newMessage :
+						newMessage;
+
 		channel.retrieveWebhooks().queue(
 				webhooks -> {
 					if (webhooks.size() == 0) {
 						channel.createWebhook("censor").queue(
 								fakeWebhook -> message.delete().queue(
-										v -> sendWebhookMessage(fakeWebhook, author, newMessage),
+										v -> sendWebhookMessage(fakeWebhook, author, newReply),
 										throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!")
 								)
 						);
 					} else {
 						message.delete().queue(
-								v -> sendWebhookMessage(webhooks.get(0), author, newMessage),
+								v -> sendWebhookMessage(webhooks.get(0), author, newReply),
 								throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!")
 						);
 					}
