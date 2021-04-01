@@ -21,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,21 +51,6 @@ public class Censor {
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> createMember(author, dcGuild));
 		final long originalWarnCount = dcMember.getWarningCount();
 		dcMember.increaseMessageCount();
-
-		// april fools (replace message with a fake one)
-		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC+2"));
-		final LocalDateTime start = LocalDateTime.of(2021, 4, 1, 0, 0);
-		final LocalDateTime end = LocalDateTime.of(2021, 4, 2, 12, 0);
-		if (now.isAfter(start) && now.isBefore(end)) {
-			final Random random = new Random();
-			final double randomDouble = random.nextDouble();
-			if (randomDouble <= 0.037) {
-				final FakeMessage fakeMsg = new FakeMessage(message);
-				fakeMsg.replaceMessage();
-				return;
-			}
-		}
-		// if not april fools candidate censor normally
 
 		final String originalContent = message.getContentRaw();
 		final String censoredContent = censorContent(dcGuild, dcMember, originalContent);
