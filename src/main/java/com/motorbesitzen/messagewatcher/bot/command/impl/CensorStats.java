@@ -47,7 +47,7 @@ class CensorStats extends CommandImpl {
 		final Message message = event.getMessage();
 		final long mentionedMemberId = DiscordMessageUtil.getMentionedMemberId(message);
 		if (mentionedMemberId == -1) {
-			sendErrorMessage(channel, "Please provide a mention or an ID for the delete command.");
+			sendErrorMessage(channel, "Please provide a mention or an ID for the stats command.");
 			return;
 		}
 
