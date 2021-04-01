@@ -174,10 +174,10 @@ public class FakeMessage {
 	}
 
 	private String replaceRandomCharacter() {
-		final char rdmChar = (char) (random.nextInt(26) + 97);
-		final char rdmCharReplacement = (char) (random.nextInt(26) + 97);
 		final String original = message.getContentRaw();
-		return original.replaceAll("" + rdmChar, "" + rdmCharReplacement);
+		final char rdmChar = original.charAt(random.nextInt(original.length()));
+		final char rdmCharReplacement = (char) (random.nextInt(26) + 97);
+		return original.replaceAll("(?i)" + rdmChar, "" + rdmCharReplacement);
 	}
 
 	private String getPersonalInsult(final User toInsult) {
