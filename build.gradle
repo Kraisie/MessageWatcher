@@ -46,14 +46,6 @@ test {
     useJUnitPlatform()
 }
 
-jar {
-    manifest {
-        attributes(
-                'Main-Class': group + '.rolewatcher.RolewatcherApplication'
-        )
-    }
-}
-
 bootRun {
     file('.env').readLines().each() {
         if (!it.isEmpty() && !it.startsWith("#")) {

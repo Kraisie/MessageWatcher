@@ -59,13 +59,13 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	private String getToken() {
 		final String discordToken = EnvironmentUtil.getEnvironmentVariable("DC_TOKEN");
 		if (discordToken == null) {
-			LogUtil.logError("RoleWatcher Discord token is null! Please check the environment variables and add a token.");
+			LogUtil.logError("Discord token is null! Please check the environment variables and add a token.");
 			shutdown();
 			return null;
 		}
 
 		if (discordToken.isBlank()) {
-			LogUtil.logError("RoleWatcher Discord token is empty! Please check the environment variables and add a token.");
+			LogUtil.logError("Discord token is empty! Please check the environment variables and add a token.");
 			shutdown();
 			return null;
 		}
