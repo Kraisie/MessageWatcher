@@ -32,7 +32,7 @@ class ReportSettings extends CommandImpl {
 
 	@Override
 	public String getUsage() {
-		return getName() + "emote threshold #channel";
+		return getName() + " emote threshold #channel";
 	}
 
 	@Override
