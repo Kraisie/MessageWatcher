@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,10 +34,6 @@ public class ReactionListener extends ListenerAdapter {
 	}
 
 	private void handleReaction(final GuildMessageReactionAddEvent event, final Message message) {
-		if (message.isWebhookMessage() || message.getAuthor().isBot()) {
-			return;
-		}
-
 		final Guild guild = event.getGuild();
 		final long guildId = guild.getIdLong();
 		final Optional<DiscordGuild> discordGuildOpt = guildRepo.findById(guildId);
@@ -107,7 +104,8 @@ public class ReactionListener extends ListenerAdapter {
 
 	private void buildEmbedReport(final TextChannel reportChannel, final Message message, final Emote reportEmote) {
 		final EmbedBuilder reportEmbed = new EmbedBuilder();
-		reportEmbed.setTitle("A message by " + message.getAuthor().getAsTag() + " has been reported!");
+		final String author = message.isWebhookMessage() ? "a webhook" : message.getAuthor().getAsTag();
+		reportEmbed.setTitle("A message by " + author + " has been reported!");
 		reportEmbed.setColor(Color.RED);
 		reportEmbed.addField("Sender", message.getAuthor().getAsMention(), false);
 
@@ -134,7 +132,11 @@ public class ReactionListener extends ListenerAdapter {
 
 			if (reaction.getReactionEmote().getIdLong() == reportEmote.getIdLong()) {
 				reaction.retrieveUsers().queue(
-						reporters -> buildEmbedCallbackReporters(reportChannel, reportEmbed, message, reporters)
+						reporters -> buildEmbedCallbackReporters(reportChannel, reportEmbed, message, reporters),
+						throwable -> {
+							LogUtil.logError("Could not request the users who reacted to a reported message!", throwable);
+							buildEmbedCallbackReporters(reportChannel, reportEmbed, message, new ArrayList<>());
+						}
 				);
 			}
 		}
@@ -146,13 +148,14 @@ public class ReactionListener extends ListenerAdapter {
 			users.append(user.getAsMention()).append(" ");
 		}
 
-		String messageLink = "https://discord.com/channels/" + message.getGuild().getId() + "/" + message.getTextChannel().getId() + "/" + message.getId();
-		reportEmbed.addField("Reported by", users.toString(), false);
+		final String reportUsers = users.length() > 0 ? users.toString() : "Could not request users who reported that message!";
+		final String messageLink = "https://discord.com/channels/" + message.getGuild().getId() + "/" + message.getTextChannel().getId() + "/" + message.getId();
+		reportEmbed.addField("Reported by", reportUsers, false);
 		reportEmbed.addBlankField(false);
 		reportEmbed.addField("Direct link", messageLink, false);
 		reportEmbed.setFooter("Message content can be empty if it consists of a file attachment other than a picture!");
 
-		List<Message.Attachment> attachments = message.getAttachments();
+		final List<Message.Attachment> attachments = message.getAttachments();
 		for (Message.Attachment attachment : attachments) {
 			if (attachment.isImage()) {
 				reportEmbed.setImage(attachment.getProxyUrl());
