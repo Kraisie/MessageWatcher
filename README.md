@@ -263,8 +263,8 @@ the file yourself. The file can be used for sample data.
 ### Adding commands
 
 To add a command to the bot there are a few steps to perform. First create the command class in
-`com.motorbesitzen.rolewatcher.bot.command.impl`. The command class needs to extend `CommandImpl`. The command needs to
-be a `@Service` and needs to have its command set as a value in lowercase. So a command like `help` would be the
+`com.motorbesitzen.messagewatcher.bot.command.impl`. The command class needs to extend `CommandImpl`. The command needs
+to be a `@Service` and needs to have its command set as a value in lowercase. So a command like `help` would be the
 following:
 
 ```java
