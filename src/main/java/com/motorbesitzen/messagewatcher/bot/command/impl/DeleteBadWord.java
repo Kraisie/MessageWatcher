@@ -72,8 +72,8 @@ class DeleteBadWord extends CommandImpl {
 
 			final List<BadWord> badWordMatches = badWordRepo.findByWordAndGuild_GuildId(badWord, dcGuild.getGuildId());
 			if (badWordMatches.size() == 0) {
-				sendErrorMessage(channel, "Word does not exist in database!");
-				return;
+				sendErrorMessage(channel, "\"" + badWord + "\" does not exist in database!");
+				continue;
 			}
 
 			for (BadWord badWordMatch : badWordMatches) {
