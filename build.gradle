@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.motorbesitzen'
-version = '0.2.2'
+version = '0.2.3'
 sourceCompatibility = '11'
 
 configurations {
@@ -44,21 +44,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-bootRun {
-    file('.env').readLines().each() {
-        if (!it.isEmpty() && !it.startsWith("#")) {
-            def pos = it.indexOf("=")
-            def key = it.substring(0, pos).trim()
-            def value = it.substring(pos + 1).trim()
-            if (value.startsWith("\"") && value.endsWith("\"")) {
-                value = value.substring(1, value.length() - 1)
-            }
-
-            if (System.getenv(key) == null) {
-                environment key, value
-            }
-        }
-    }
 }
