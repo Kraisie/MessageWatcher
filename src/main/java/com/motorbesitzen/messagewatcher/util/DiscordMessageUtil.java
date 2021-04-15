@@ -2,7 +2,6 @@ package com.motorbesitzen.messagewatcher.util;
 
 import net.dv8tion.jda.api.entities.Message;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -58,28 +57,5 @@ public final class DiscordMessageUtil {
 		}
 
 		return quoted;
-	}
-
-	/**
-	 * Defines the color used for embeds in Discord (color bar on the left). If no color is set in the environment
-	 * variables it returns orange ({@code #de690c} / {@code rgb(222,105,12)}).
-	 *
-	 * @return The color to use for embeds.
-	 */
-	public static Color getEmbedColor() {
-		String envR = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_R", "222");
-		String envG = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_G", "105");
-		String envB = EnvironmentUtil.getEnvironmentVariableOrDefault("EMBED_COLOR_B", "12");
-
-		int r = ParseUtil.safelyParseStringToInt(envR);
-		int g = ParseUtil.safelyParseStringToInt(envG);
-		int b = ParseUtil.safelyParseStringToInt(envB);
-
-		// make sure r,g,b stay in rgb range of 0-255
-		return new Color(
-				Math.max(0, r % 256),
-				Math.max(0, g % 256),
-				Math.max(0, b % 256)
-		);
 	}
 }

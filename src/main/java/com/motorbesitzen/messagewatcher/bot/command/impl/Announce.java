@@ -1,11 +1,12 @@
 package com.motorbesitzen.messagewatcher.bot.command.impl;
 
 import com.motorbesitzen.messagewatcher.bot.command.CommandImpl;
-import com.motorbesitzen.messagewatcher.util.EnvironmentUtil;
+import com.motorbesitzen.messagewatcher.bot.service.EnvSettings;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,13 @@ import java.util.Optional;
  */
 @Service("announce")
 class Announce extends CommandImpl {
+
+	private final EnvSettings envSettings;
+
+	@Autowired
+	Announce(final EnvSettings envSettings) {
+		this.envSettings = envSettings;
+	}
 
 	@Override
 	public String getName() {
@@ -123,7 +131,7 @@ class Announce extends CommandImpl {
 			return mentionedRole.getAsMention() + "\n";
 		}
 
-		final String prefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
+		final String prefix = envSettings.getCommandPrefix();
 		if (rawMessage.toLowerCase().startsWith(prefix + "announce here")) {
 			return "@here\n";
 		}

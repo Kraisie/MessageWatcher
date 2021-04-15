@@ -21,7 +21,7 @@ class DeleteBlacklistedDomain extends CommandImpl {
 	private final BlacklistedDomainRepo domainRepo;
 
 	@Autowired
-	DeleteBlacklistedDomain(DiscordGuildRepo guildRepo, BlacklistedDomainRepo domainRepo) {
+	DeleteBlacklistedDomain(final DiscordGuildRepo guildRepo, final BlacklistedDomainRepo domainRepo) {
 		this.guildRepo = guildRepo;
 		this.domainRepo = domainRepo;
 	}

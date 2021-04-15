@@ -1,10 +1,10 @@
 package com.motorbesitzen.messagewatcher.bot.command.impl;
 
 import com.motorbesitzen.messagewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.messagewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.messagewatcher.data.dao.BadWord;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +19,11 @@ class ListBadWords extends CommandImpl {
 
 	private static final int FIELDS_PER_EMBED = 25;
 	private final DiscordGuildRepo guildRepo;
+	private final EnvSettings envSettings;
 
 	@Autowired
-	public ListBadWords(final DiscordGuildRepo guildRepo) {
+	ListBadWords(final EnvSettings envSettings, final DiscordGuildRepo guildRepo) {
+		this.envSettings = envSettings;
 		this.guildRepo = guildRepo;
 	}
 
@@ -83,7 +85,7 @@ class ListBadWords extends CommandImpl {
 						"Blocked words" :
 						"Blocked words [" + page + "/" + totalPages + "]"
 		).setDescription("A list of all blocked words and their replacement.");
-		eb.setColor(DiscordMessageUtil.getEmbedColor());
+		eb.setColor(envSettings.getEmbedColor());
 		return eb;
 	}
 }

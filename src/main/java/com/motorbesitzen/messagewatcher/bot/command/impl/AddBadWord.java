@@ -23,7 +23,7 @@ class AddBadWord extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public AddBadWord(final DiscordGuildRepo guildRepo) {
+	AddBadWord(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 

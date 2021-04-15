@@ -22,7 +22,7 @@ class DeleteBadWord extends CommandImpl {
 	private final BadWordRepo badWordRepo;
 
 	@Autowired
-	DeleteBadWord(DiscordGuildRepo guildRepo, BadWordRepo badWordRepo) {
+	DeleteBadWord(final DiscordGuildRepo guildRepo, final BadWordRepo badWordRepo) {
 		this.guildRepo = guildRepo;
 		this.badWordRepo = badWordRepo;
 	}

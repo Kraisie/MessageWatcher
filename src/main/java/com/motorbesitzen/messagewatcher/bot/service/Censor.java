@@ -8,7 +8,6 @@ import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordMember;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordMemberRepo;
-import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -27,6 +26,7 @@ import java.util.regex.Pattern;
 @Service
 public class Censor {
 
+	private final EnvSettings envSettings;
 	private final DiscordGuildRepo guildRepo;
 	private final DiscordMemberRepo memberRepo;
 
@@ -34,7 +34,8 @@ public class Censor {
 			"(?i)(?:(?:https?|ftp)://)(?![^/]*--)(?![^/]*\\./)(?:\\S+(?::\\S*)?@)?(?:(?!(?:10|127)(?:\\.\\d{1,3}){3})(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\x{00a1}-\\x{ffff}0-9]-*)*[a-z\\x{00a1}-\\x{ffff}0-9]+)(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}0-9]-*)*[a-z\\x{00a1}-\\x{ffff}0-9]+)*(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}]{2,}))\\.?)(?::\\d{2,5})?(?:[/?#]\\S*)?";
 
 	@Autowired
-	public Censor(final DiscordGuildRepo guildRepo, final DiscordMemberRepo memberRepo) {
+	Censor(final EnvSettings envSettings, final DiscordGuildRepo guildRepo, final DiscordMemberRepo memberRepo) {
+		this.envSettings = envSettings;
 		this.guildRepo = guildRepo;
 		this.memberRepo = memberRepo;
 	}
@@ -224,7 +225,7 @@ public class Censor {
 
 			final String replacement = badWord.getReplacement();
 			final Matcher matcher = pattern.matcher(newPart);
-			final StringBuffer sb = new StringBuffer();
+			final StringBuilder sb = new StringBuilder();
 			while (matcher.find()) {
 				matcher.appendReplacement(sb, replacement);
 				dcMember.increaseWordCensorCount();
@@ -302,7 +303,7 @@ public class Censor {
 	private void replaceMessageEmbed(final Message message, final String newMessage, final String warnMessage) {
 		final TextChannel channel = message.getTextChannel();
 		final EmbedBuilder eb = new EmbedBuilder();
-		eb.setColor(DiscordMessageUtil.getEmbedColor());
+		eb.setColor(envSettings.getEmbedColor());
 		eb.setAuthor(message.getAuthor().getName(), null, message.getAuthor().getEffectiveAvatarUrl());
 		eb.setTitle("Message censored:").setDescription(getWrappedMessage(newMessage));
 		eb.setFooter(warnMessage);

@@ -20,7 +20,7 @@ class AddWhitelistedChannel extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public AddWhitelistedChannel(final DiscordGuildRepo guildRepo) {
+	AddWhitelistedChannel(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 

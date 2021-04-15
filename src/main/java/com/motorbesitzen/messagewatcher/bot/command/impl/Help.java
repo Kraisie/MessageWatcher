@@ -2,8 +2,7 @@ package com.motorbesitzen.messagewatcher.bot.command.impl;
 
 import com.motorbesitzen.messagewatcher.bot.command.Command;
 import com.motorbesitzen.messagewatcher.bot.command.CommandImpl;
-import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
-import com.motorbesitzen.messagewatcher.util.EnvironmentUtil;
+import com.motorbesitzen.messagewatcher.bot.service.EnvSettings;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -20,11 +19,13 @@ import java.util.Map;
 @Service("help")
 class Help extends CommandImpl {
 
-	private static final int FIELDS_PER_EMBED = 25;
 	private final Map<String, Command> commandMap;
+	private static final int FIELDS_PER_EMBED = 25;
+	private final EnvSettings envSettings;
 
 	@Autowired
-	Help(final Map<String, Command> commandMap) {
+	Help(final EnvSettings envSettings, final Map<String, Command> commandMap) {
+		this.envSettings = envSettings;
 		this.commandMap = commandMap;
 	}
 
@@ -89,16 +90,16 @@ class Help extends CommandImpl {
 	 * @return An {@code EmbedBuilder} with page identification if needed.
 	 */
 	private EmbedBuilder buildEmbedPage(final int page, final int totalPages) {
-		return new EmbedBuilder().setColor(
-				DiscordMessageUtil.getEmbedColor()
-		).setTitle(
-				page == 1 && totalPages == 1 ?
-						"Commands and their variations" :
-						"Commands and their variations [" + page + "/" + totalPages + "]"
-		).setDescription(
-				"A list of all commands you can use and what they do. " +
-						"Note that \"(a|b|c)\" means that a, b or c can be chosen."
-		);
+		return new EmbedBuilder()
+				.setColor(envSettings.getEmbedColor())
+				.setTitle(
+						page == 1 && totalPages == 1 ?
+								"Commands and their variations" :
+								"Commands and their variations [" + page + "/" + totalPages + "]"
+				).setDescription(
+						"A list of all commands you can use and what they do. " +
+								"Note that \"(a|b|c)\" means that a, b or c can be chosen."
+				);
 	}
 
 	/**
@@ -108,7 +109,7 @@ class Help extends CommandImpl {
 	 * @param command The command to add to the help page.
 	 */
 	private void addHelpEntry(final EmbedBuilder eb, final Command command) {
-		final String prefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
+		final String prefix = envSettings.getCommandPrefix();
 		final String title = prefix + command.getUsage();
 		eb.addField(title, command.getDescription(), false);
 	}

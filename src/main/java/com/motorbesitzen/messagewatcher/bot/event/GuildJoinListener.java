@@ -18,7 +18,7 @@ public class GuildJoinListener extends ListenerAdapter {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public GuildJoinListener(final DiscordGuildRepo guildRepo) {
+	GuildJoinListener(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 

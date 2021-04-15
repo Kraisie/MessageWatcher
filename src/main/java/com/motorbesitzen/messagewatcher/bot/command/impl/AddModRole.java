@@ -20,7 +20,7 @@ public class AddModRole extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public AddModRole(final DiscordGuildRepo guildRepo) {
+	AddModRole(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 

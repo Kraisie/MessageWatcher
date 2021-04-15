@@ -21,7 +21,7 @@ public class ReactionListener extends ListenerAdapter {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public ReactionListener(final DiscordGuildRepo guildRepo) {
+	ReactionListener(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 

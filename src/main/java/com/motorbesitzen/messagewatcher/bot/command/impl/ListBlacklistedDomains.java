@@ -1,10 +1,10 @@
 package com.motorbesitzen.messagewatcher.bot.command.impl;
 
 import com.motorbesitzen.messagewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.messagewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.messagewatcher.data.dao.BlacklistedDomain;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +19,11 @@ class ListBlacklistedDomains extends CommandImpl {
 
 	private static final int FIELDS_PER_EMBED = 25;
 	private final DiscordGuildRepo guildRepo;
+	private final EnvSettings envSettings;
 
 	@Autowired
-	public ListBlacklistedDomains(DiscordGuildRepo guildRepo) {
+	ListBlacklistedDomains(final EnvSettings envSettings, final DiscordGuildRepo guildRepo) {
+		this.envSettings = envSettings;
 		this.guildRepo = guildRepo;
 	}
 
@@ -79,8 +81,8 @@ class ListBlacklistedDomains extends CommandImpl {
 				page == 1 && totalPages == 1 ?
 						"Blacklisted domains" :
 						"Blacklisted domains [" + page + "/" + totalPages + "]"
-		).setDescription("A list of all blacklisted domains.");
-		eb.setColor(DiscordMessageUtil.getEmbedColor());
+		).setDescription("A list of all blacklisted domains.")
+				.setColor(envSettings.getEmbedColor());
 		return eb;
 	}
 }

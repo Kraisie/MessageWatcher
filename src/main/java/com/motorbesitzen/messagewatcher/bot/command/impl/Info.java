@@ -1,11 +1,11 @@
 package com.motorbesitzen.messagewatcher.bot.command.impl;
 
 import com.motorbesitzen.messagewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.messagewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.messagewatcher.data.dao.ModRole;
 import com.motorbesitzen.messagewatcher.data.dao.WhitelistedChannel;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
@@ -22,10 +22,12 @@ import java.util.Set;
 @Service("info")
 class Info extends CommandImpl {
 
+	private final EnvSettings envSettings;
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public Info(final DiscordGuildRepo guildRepo) {
+	Info(final EnvSettings envSettings, final DiscordGuildRepo guildRepo) {
+		this.envSettings = envSettings;
 		this.guildRepo = guildRepo;
 	}
 
@@ -89,7 +91,7 @@ class Info extends CommandImpl {
 
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Info for \"" + event.getGuild().getName() + "\":");
-		eb.setColor(DiscordMessageUtil.getEmbedColor());
+		eb.setColor(envSettings.getEmbedColor());
 		eb.addField("Censors of punishable words to kick:", String.valueOf(dcGuild.getCensorKickThreshold()), false);
 		setReportInfo(eb, event.getGuild(), dcGuild);
 		eb.addBlankField(false);

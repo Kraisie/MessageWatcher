@@ -1,6 +1,5 @@
-package com.motorbesitzen.messagewatcher.bot;
+package com.motorbesitzen.messagewatcher.bot.service;
 
-import com.motorbesitzen.messagewatcher.util.EnvironmentUtil;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -22,17 +21,19 @@ import java.util.Map;
 public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 
 	private final ApplicationContext applicationContext;
+	private final EnvSettings envSettings;
 	private final Map<String, ? extends ListenerAdapter> eventListeners;
 
 	@Autowired
-	private BotBuilder(final ApplicationContext applicationContext, final Map<String, ? extends ListenerAdapter> eventListeners) {
+	private BotBuilder(final ApplicationContext applicationContext, final EnvSettings envSettings,
+					   final Map<String, ? extends ListenerAdapter> eventListeners) {
 		this.applicationContext = applicationContext;
+		this.envSettings = envSettings;
 		this.eventListeners = eventListeners;
 	}
 
 	/**
 	 * Gets called by Spring as late as conceivably possible to indicate that the application is ready.
-	 * Starts the RoleUpdater and by that the underlying bot.
 	 *
 	 * @param event Provided by Spring when the Spring application is ready.
 	 */
@@ -57,7 +58,7 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @return The token as a {@code String}.
 	 */
 	private String getToken() {
-		final String discordToken = EnvironmentUtil.getEnvironmentVariable("DC_TOKEN");
+		final String discordToken = envSettings.getToken();
 		if (discordToken == null) {
 			LogUtil.logError("Discord token is null! Please check the environment variables and add a token.");
 			shutdown();
@@ -94,9 +95,9 @@ public class BotBuilder implements ApplicationListener<ApplicationReadyEvent> {
 	 * @return A Discord {@code Activity} object.
 	 */
 	private Activity getBotActivity() {
-		final String activityType = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY");
-		final String activityText = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_TEXT");
-		final String activityStreamingUrl = EnvironmentUtil.getEnvironmentVariable("BOT_ACTIVITY_STREAMING_URL");
+		final String activityType = envSettings.getBotActivityType();
+		final String activityText = envSettings.getBotActivityText();
+		final String activityStreamingUrl = envSettings.getBotStreamingUrl();
 
 		if (activityType == null || activityText == null) {
 			LogUtil.logInfo("Activity or activity text not given, ignoring activity settings.");

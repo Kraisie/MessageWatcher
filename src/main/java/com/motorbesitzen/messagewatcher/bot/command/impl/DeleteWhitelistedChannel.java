@@ -22,7 +22,7 @@ class DeleteWhitelistedChannel extends CommandImpl {
 	private final WhitelistedChannelRepo channelRepo;
 
 	@Autowired
-	public DeleteWhitelistedChannel(final DiscordGuildRepo guildRepo, final WhitelistedChannelRepo channelRepo) {
+	DeleteWhitelistedChannel(final DiscordGuildRepo guildRepo, final WhitelistedChannelRepo channelRepo) {
 		this.guildRepo = guildRepo;
 		this.channelRepo = channelRepo;
 	}

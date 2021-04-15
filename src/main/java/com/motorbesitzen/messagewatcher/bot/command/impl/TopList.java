@@ -1,6 +1,7 @@
 package com.motorbesitzen.messagewatcher.bot.command.impl;
 
 import com.motorbesitzen.messagewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.messagewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordMember;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordMemberRepo;
 import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
@@ -20,10 +21,12 @@ import java.util.List;
 @Service("top")
 class TopList extends CommandImpl {
 
+	private final EnvSettings envSettings;
 	private final DiscordMemberRepo memberRepo;
 
 	@Autowired
-	TopList(final DiscordMemberRepo memberRepo) {
+	TopList(final EnvSettings envSettings, final DiscordMemberRepo memberRepo) {
+		this.envSettings = envSettings;
 		this.memberRepo = memberRepo;
 	}
 
@@ -100,7 +103,7 @@ class TopList extends CommandImpl {
 	private EmbedBuilder buildTopMessage(final Guild guild, final List<DiscordMember> topMembers) {
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Top " + topMembers.size() + " of " + guild.getName() + ":");
-		eb.setColor(DiscordMessageUtil.getEmbedColor());
+		eb.setColor(envSettings.getEmbedColor());
 		addMemberFields(eb, topMembers);
 
 		return eb;

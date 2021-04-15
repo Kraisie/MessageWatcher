@@ -22,7 +22,7 @@ class DeleteModRole extends CommandImpl {
 	private final ModRoleRepo roleRepo;
 
 	@Autowired
-	public DeleteModRole(final DiscordGuildRepo guildRepo, final ModRoleRepo roleRepo) {
+	DeleteModRole(final DiscordGuildRepo guildRepo, final ModRoleRepo roleRepo) {
 		this.guildRepo = guildRepo;
 		this.roleRepo = roleRepo;
 	}

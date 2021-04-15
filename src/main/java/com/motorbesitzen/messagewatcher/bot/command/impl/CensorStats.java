@@ -1,6 +1,7 @@
 package com.motorbesitzen.messagewatcher.bot.command.impl;
 
 import com.motorbesitzen.messagewatcher.bot.command.CommandImpl;
+import com.motorbesitzen.messagewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordMember;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordMemberRepo;
 import com.motorbesitzen.messagewatcher.util.DiscordMessageUtil;
@@ -19,10 +20,12 @@ import java.util.Optional;
 @Service("stats")
 class CensorStats extends CommandImpl {
 
+	private final EnvSettings envSettings;
 	private final DiscordMemberRepo memberRepo;
 
 	@Autowired
-	CensorStats(final DiscordMemberRepo memberRepo) {
+	CensorStats(final EnvSettings envSettings, final DiscordMemberRepo memberRepo) {
+		this.envSettings = envSettings;
 		this.memberRepo = memberRepo;
 	}
 
@@ -74,7 +77,7 @@ class CensorStats extends CommandImpl {
 
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Censor stats for " + discordTag + ":");
-		eb.setColor(DiscordMessageUtil.getEmbedColor());
+		eb.setColor(envSettings.getEmbedColor());
 		eb.addField("Messages sent:", String.valueOf(msgCount), true);
 		eb.addField("Words censored:", String.valueOf(wordCount), true);
 		eb.addField("Links censored:", String.valueOf(linkCount), true);

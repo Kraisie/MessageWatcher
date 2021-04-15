@@ -2,9 +2,9 @@ package com.motorbesitzen.messagewatcher.bot.event;
 
 import com.motorbesitzen.messagewatcher.bot.command.Command;
 import com.motorbesitzen.messagewatcher.bot.service.Censor;
+import com.motorbesitzen.messagewatcher.bot.service.EnvSettings;
 import com.motorbesitzen.messagewatcher.data.repo.ModRoleRepo;
 import com.motorbesitzen.messagewatcher.data.repo.WhitelistedChannelRepo;
-import com.motorbesitzen.messagewatcher.util.EnvironmentUtil;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -22,14 +22,16 @@ import java.util.Map;
 public class GuildMessageListener extends ListenerAdapter {
 
 	private final Censor censor;
+	private final EnvSettings envSettings;
 	private final Map<String, Command> commandMap;
 	private final WhitelistedChannelRepo channelRepo;
 	private final ModRoleRepo roleRepo;
 
 	@Autowired
-	public GuildMessageListener(final Censor censor, final Map<String, Command> commandMap,
-								final WhitelistedChannelRepo channelRepo, final ModRoleRepo roleRepo) {
+	GuildMessageListener(final Censor censor, final EnvSettings envSettings, final Map<String, Command> commandMap,
+						 final WhitelistedChannelRepo channelRepo, final ModRoleRepo roleRepo) {
 		this.censor = censor;
+		this.envSettings = envSettings;
 		this.commandMap = commandMap;
 		this.channelRepo = channelRepo;
 		this.roleRepo = roleRepo;
@@ -44,7 +46,7 @@ public class GuildMessageListener extends ListenerAdapter {
 		}
 
 		// check for command
-		final String prefix = EnvironmentUtil.getEnvironmentVariableOrDefault("CMD_PREFIX", "");
+		final String prefix = envSettings.getCommandPrefix();
 		final String rawMessage = message.getContentRaw();
 		if (rawMessage.startsWith(prefix)) {
 			final Command command = identifyCommand(prefix, rawMessage);

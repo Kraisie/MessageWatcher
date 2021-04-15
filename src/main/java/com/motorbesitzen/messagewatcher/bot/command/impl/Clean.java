@@ -19,7 +19,7 @@ class Clean extends CommandImpl {
 	private final WhitelistedChannelRepo channelRepo;
 
 	@Autowired
-	Clean(WhitelistedChannelRepo channelRepo) {
+	Clean(final WhitelistedChannelRepo channelRepo) {
 		this.channelRepo = channelRepo;
 	}
 

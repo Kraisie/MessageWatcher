@@ -20,7 +20,7 @@ class AddBlacklistedDomain extends CommandImpl {
 	private final DiscordGuildRepo guildRepo;
 
 	@Autowired
-	public AddBlacklistedDomain(final DiscordGuildRepo guildRepo) {
+	AddBlacklistedDomain(final DiscordGuildRepo guildRepo) {
 		this.guildRepo = guildRepo;
 	}
 

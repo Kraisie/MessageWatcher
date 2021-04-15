@@ -28,7 +28,7 @@ public class DeletionListener extends ListenerAdapter {
 	private final WhitelistedChannelRepo channelRepo;
 
 	@Autowired
-	public DeletionListener(final DiscordGuildRepo guildRepo, final ModRoleRepo roleRepo, final WhitelistedChannelRepo channelRepo) {
+	DeletionListener(final DiscordGuildRepo guildRepo, final ModRoleRepo roleRepo, final WhitelistedChannelRepo channelRepo) {
 		this.guildRepo = guildRepo;
 		this.roleRepo = roleRepo;
 		this.channelRepo = channelRepo;
