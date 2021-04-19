@@ -291,7 +291,10 @@ public class Censor {
 	}
 
 	private void sendWebhookMessage(final Webhook fakeWebhook, final Member author, final String newMessage) {
-		final String noPingMessage = newMessage.replaceAll("@everyone", "").replaceAll("@here", "");
+		final String noPingMessage =
+				newMessage.replaceAll("@everyone", "")
+				.replaceAll("@here", "")
+				.replaceAll("<@&[0-9]{15,20}>", "");
 		final WebhookClient client = WebhookClient.withUrl(fakeWebhook.getUrl());
 		final WebhookMessageBuilder builder = new WebhookMessageBuilder();
 		builder.setUsername(author.getEffectiveName());
