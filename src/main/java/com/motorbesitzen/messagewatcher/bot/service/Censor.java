@@ -1,6 +1,7 @@
 package com.motorbesitzen.messagewatcher.bot.service;
 
 import club.minnced.discord.webhook.WebhookClient;
+import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.motorbesitzen.messagewatcher.data.dao.BadWord;
 import com.motorbesitzen.messagewatcher.data.dao.BlacklistedDomain;
@@ -291,15 +292,13 @@ public class Censor {
 	}
 
 	private void sendWebhookMessage(final Webhook fakeWebhook, final Member author, final String newMessage) {
-		final String noPingMessage =
-				newMessage.replaceAll("@everyone", "")
-				.replaceAll("@here", "")
-				.replaceAll("<@&[0-9]{15,20}>", "");
 		final WebhookClient client = WebhookClient.withUrl(fakeWebhook.getUrl());
 		final WebhookMessageBuilder builder = new WebhookMessageBuilder();
+		final AllowedMentions noMassPings =  new AllowedMentions().withParseEveryone(false).withParseRoles(false);
 		builder.setUsername(author.getEffectiveName());
 		builder.setAvatarUrl(author.getUser().getEffectiveAvatarUrl());
-		builder.setContent(getWrappedMessage(noPingMessage));
+		builder.setContent(getWrappedMessage(newMessage));
+		builder.setAllowedMentions(noMassPings);
 		client.send(builder.build());
 		client.close();
 	}
