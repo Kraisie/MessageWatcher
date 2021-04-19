@@ -294,7 +294,7 @@ public class Censor {
 	private void sendWebhookMessage(final Webhook fakeWebhook, final Member author, final String newMessage) {
 		final WebhookClient client = WebhookClient.withUrl(fakeWebhook.getUrl());
 		final WebhookMessageBuilder builder = new WebhookMessageBuilder();
-		final AllowedMentions noMassPings =  new AllowedMentions().withParseEveryone(false).withParseRoles(false);
+		final AllowedMentions noMassPings = new AllowedMentions().withParseEveryone(false).withParseRoles(false).withParseUsers(true);
 		builder.setUsername(author.getEffectiveName());
 		builder.setAvatarUrl(author.getUser().getEffectiveAvatarUrl());
 		builder.setContent(getWrappedMessage(newMessage));
