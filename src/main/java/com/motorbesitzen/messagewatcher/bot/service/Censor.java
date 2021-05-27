@@ -59,7 +59,13 @@ public class Censor {
 				replaceMessageWebhook(message, censoredContent);
 			} else {
 				replaceMessageEmbed(message, censoredContent, "You have used a kickable word. Be aware that further usage will be punished!");
-				if (dcGuild.getCensorKickThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() && dcMember.getWarningCount() >= dcGuild.getCensorKickThreshold()) {
+				if (dcGuild.getCensorBanThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() &&
+						dcMember.getWarningCount() >= dcGuild.getCensorBanThreshold()) {
+					banMember(guild, dcGuild, dcMember);
+				}
+
+				if (dcGuild.getCensorKickThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() &&
+						dcMember.getWarningCount() >= dcGuild.getCensorKickThreshold()) {
 					kickMember(guild, dcGuild, dcMember);
 				}
 			}
@@ -355,6 +361,32 @@ public class Censor {
 		if (attachment.isImage()) {
 			eb.setImage(attachment.getProxyUrl());
 		}
+	}
+
+	private void banMember(final Guild guild, final DiscordGuild dcGuild, final DiscordMember dcMember) {
+		try {
+			tryBan(guild, dcGuild, dcMember);
+		} catch (HierarchyException e) {
+			LogUtil.logDebug("Could not ban member " + dcMember.getDiscordId() + " on \"" + guild.getName() + "\".", e);
+		}
+	}
+
+	private void tryBan(final Guild guild, final DiscordGuild dcGuild, final DiscordMember dcMember) throws HierarchyException {
+		guild.retrieveMemberById(dcMember.getDiscordId()).queue(
+				member -> {
+					if (guild.getSelfMember().canInteract(member)) {
+						member.ban(0, "Banned for reaching " + dcGuild.getCensorBanThreshold() +
+								" censor infractions (infractions: " + dcMember.getWarningCount() + ")!").queue(
+								v -> LogUtil.logInfo("Banned " + member.getUser().getAsTag() + " for reaching the censor limit of guild " + guild.getName()),
+								throwable -> LogUtil.logDebug("Could not ban " + member.getUser().getAsTag() + " for reaching the " +
+										"censor limit of guild \"" + guild.getName(), throwable)
+						);
+					} else {
+						LogUtil.logDebug("Can not interact (censor ban) with " + member.getUser().getAsTag() + " (" + member.getId() + ").");
+					}
+				},
+				throwable -> LogUtil.logDebug("Could not retrieve author to ban for censor.", throwable)
+		);
 	}
 
 	private void kickMember(final Guild guild, final DiscordGuild dcGuild, final DiscordMember dcMember) {

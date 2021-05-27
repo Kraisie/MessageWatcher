@@ -93,6 +93,8 @@ class Info extends CommandImpl {
 		eb.setTitle("Info for \"" + event.getGuild().getName() + "\":");
 		eb.setColor(envSettings.getEmbedColor());
 		eb.addField("Censors of punishable words to kick:", String.valueOf(dcGuild.getCensorKickThreshold()), false);
+		eb.addField("Censors of punishable words to ban:", String.valueOf(dcGuild.getCensorBanThreshold()), false);
+		eb.addBlankField(false);
 		setReportInfo(eb, event.getGuild(), dcGuild);
 		eb.addBlankField(false);
 		eb.addField("Whitelisted channels: ", channelContent, true);
