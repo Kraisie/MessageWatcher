@@ -63,6 +63,7 @@ public class Censor {
 				if (dcGuild.getCensorBanThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() &&
 						dcMember.getWarningCount() >= dcGuild.getCensorBanThreshold()) {
 					banMember(guild, dcGuild, dcMember);
+					return;
 				}
 
 				if (dcGuild.getCensorKickThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() &&
