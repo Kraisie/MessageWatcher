@@ -59,7 +59,7 @@ public class Censor {
 			if (originalWarnCount == dcMember.getWarningCount()) {
 				replaceMessageWebhook(message, censoredContent);
 			} else {
-				replaceMessageEmbed(message, censoredContent, "You have used a kickable word. Be aware that further usage will be punished!");
+				replaceMessageEmbed(message, censoredContent, "You have used a punishable word. Be aware that further usage will be punished!");
 				if (dcGuild.getCensorBanThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() &&
 						dcMember.getWarningCount() >= dcGuild.getCensorBanThreshold()) {
 					banMember(guild, dcGuild, dcMember);
