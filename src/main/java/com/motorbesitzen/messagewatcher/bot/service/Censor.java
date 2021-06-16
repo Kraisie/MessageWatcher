@@ -11,6 +11,7 @@ import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordMemberRepo;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
@@ -31,8 +32,17 @@ public class Censor {
 	private final DiscordGuildRepo guildRepo;
 	private final DiscordMemberRepo memberRepo;
 
-	private static final String LINK_REGEX =
-			"(?i)(?:(?:https?|ftp)://)(?![^/]*--)(?![^/]*\\./)(?:\\S+(?::\\S*)?@)?(?:(?!(?:10|127)(?:\\.\\d{1,3}){3})(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\x{00a1}-\\x{ffff}0-9]-*)*[a-z\\x{00a1}-\\x{ffff}0-9]+)(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}0-9]-*)*[a-z\\x{00a1}-\\x{ffff}0-9]+)*(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}]{2,}))\\.?)(?::\\d{2,5})?(?:[/?#]\\S*)?";
+	private static final Pattern LINK_PATTERN = Pattern.compile(
+			"(?i)(?:(?:https?|ftp)://)(?![^/]*--)(?![^/]*\\./)(?:\\S+(?::\\S*)?@)?(?:(?!(?:10|127)(?:\\.\\d{1,3}){3})(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\x{00a1}-\\x{ffff}0-9]-*)*[a-z\\x{00a1}-\\x{ffff}0-9]+)(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}0-9]-*)*[a-z\\x{00a1}-\\x{ffff}0-9]+)*(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}]{2,}))\\.?)(?::\\d{2,5})?(?:[/?#]\\S*)?"
+	);
+
+	private static final Pattern INVITE_PATTERN = Pattern.compile(
+			"(?:https?://)?" +                     // Scheme
+					"(?:\\w+\\.)?" +                       // Subdomain
+					"discord(?:(?:app)?\\.com" +           // Discord domain
+					"/invite|\\.gg)/(?<code>[a-z0-9-]+)" + // Path
+					"(?:\\?\\S*)?(?:#\\S*)?",              // Useless query or URN appendix
+			Pattern.CASE_INSENSITIVE);
 
 	@Autowired
 	Censor(final EnvSettings envSettings, final DiscordGuildRepo guildRepo, final DiscordMemberRepo memberRepo) {
@@ -40,6 +50,32 @@ public class Censor {
 		this.guildRepo = guildRepo;
 		this.memberRepo = memberRepo;
 	}
+
+//	private String censorWordPart(final DiscordGuild dcGuild, final DiscordMember dcMember, final String wordPart) {
+//		String newPart = wordPart;
+//		for (BadWord badWord : dcGuild.getBadWordsOrderdByWordLengthDesc()) {
+//			final Pattern pattern = badWord.isWildcard() ?
+//					Pattern.compile("(?i)" + badWord.getWord()) :                            // (?i) to ignore case
+//					Pattern.compile("(?i)(^|(?<=[\\p{S}\\p{P}\\p{C}\\s]))" + badWord.getWord() + "((?=[\\p{S}\\p{P}\\p{C}\\s])|$)");
+//
+//			final String replacement = badWord.getReplacement();
+//			final Matcher matcher = pattern.matcher(newPart);
+//			final StringBuilder sb = new StringBuilder();
+//			while (matcher.find()) {
+//				matcher.appendReplacement(sb, replacement);
+//				dcMember.increaseWordCensorCount();
+//
+//				if (badWord.isPunishable()) {
+//					dcMember.increaseWarningCount();
+//				}
+//			}
+//
+//			matcher.appendTail(sb);
+//			newPart = sb.toString();
+//		}
+//
+//		return newPart;
+//	}
 
 	@Transactional
 	public void censorMessage(final Message message) {
@@ -54,10 +90,20 @@ public class Censor {
 		dcMember.increaseMessageCount();
 
 		final String originalContent = message.getContentRaw();
-		final String censoredContent = censorContent(dcGuild, dcMember, originalContent);
+		String censoredContent = originalContent;
+		if (dcGuild.shouldCensorInvites()) {
+			censoredContent = removeInvites(dcMember, originalContent);
+		}
+
+		censoredContent = censorContent(dcGuild, dcMember, censoredContent);
 		if (isMessageCensored(originalContent, censoredContent)) {
+			final Member self = guild.getSelfMember();
 			if (originalWarnCount == dcMember.getWarningCount()) {
-				replaceMessageWebhook(message, censoredContent);
+				if (self.hasPermission(Permission.MANAGE_WEBHOOKS)) {
+					replaceMessageWebhook(message, censoredContent);
+				} else {
+					replaceMessageEmbed(message, censoredContent, null);
+				}
 			} else {
 				replaceMessageEmbed(message, censoredContent, "You have used a punishable word. Be aware that further usage will be punished!");
 				if (dcGuild.getCensorBanThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() &&
@@ -90,6 +136,18 @@ public class Censor {
 		return dcMember;
 	}
 
+	private String removeInvites(final DiscordMember dcMember, final String originalContent) {
+		final Matcher matcher = INVITE_PATTERN.matcher(originalContent);
+		final StringBuilder sb = new StringBuilder();
+		while (matcher.find()) {
+			matcher.appendReplacement(sb, "<INVITE CENSORED>");
+			dcMember.increaseLinkCensorCount();
+		}
+
+		matcher.appendTail(sb);
+		return sb.toString();
+	}
+
 	private String censorContent(final DiscordGuild dcGuild, final DiscordMember dcMember, final String content) {
 		final String[] originalLines = content.trim().split("\n");
 		final List<String> censoredLines = new ArrayList<>();
@@ -110,9 +168,8 @@ public class Censor {
 	}
 
 	private boolean isLink(final String token) {
-		final Pattern pattern = Pattern.compile(LINK_REGEX);
-		final Matcher matcher = pattern.matcher(token);
-		return matcher.find();
+		final Matcher matcher = LINK_PATTERN.matcher(token);
+		return matcher.matches();
 	}
 
 	private void addToWordMap(final Map<Integer, String> wordMap, final int pos, final String token) {

@@ -2,13 +2,11 @@ package com.motorbesitzen.messagewatcher.data.dao;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import javax.validation.constraints.Min;
 import java.util.*;
 
+@Table(name = "DiscordGuild")
 @Entity
 public class DiscordGuild {
 
@@ -34,6 +32,9 @@ public class DiscordGuild {
 	@Min(0)
 	@ColumnDefault("15")
 	private long censorBanThreshold;
+
+	@ColumnDefault("false")
+	private boolean censorInvites;
 
 	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL)
 	private Set<BadWord> badWords;
@@ -112,6 +113,14 @@ public class DiscordGuild {
 
 	public void setCensorBanThreshold(long censorBanThreshold) {
 		this.censorBanThreshold = censorBanThreshold;
+	}
+
+	public boolean shouldCensorInvites() {
+		return censorInvites;
+	}
+
+	public void setCensorInvites(boolean censorInvites) {
+		this.censorInvites = censorInvites;
 	}
 
 	public Set<BadWord> getBadWords() {

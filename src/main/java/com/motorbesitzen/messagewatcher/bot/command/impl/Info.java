@@ -94,6 +94,7 @@ class Info extends CommandImpl {
 		eb.setColor(envSettings.getEmbedColor());
 		eb.addField("Censors of punishable words to kick:", String.valueOf(dcGuild.getCensorKickThreshold()), false);
 		eb.addField("Censors of punishable words to ban:", String.valueOf(dcGuild.getCensorBanThreshold()), false);
+		eb.addField("Should censor invites?", dcGuild.shouldCensorInvites() ? "Yes" : "No", false);
 		eb.addBlankField(false);
 		setReportInfo(eb, event.getGuild(), dcGuild);
 		eb.addBlankField(false);

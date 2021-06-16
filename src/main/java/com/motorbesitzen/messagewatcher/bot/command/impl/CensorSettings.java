@@ -28,12 +28,13 @@ class CensorSettings extends CommandImpl {
 
 	@Override
 	public String getUsage() {
-		return getName() + " punishableCensorsToKick punishableCensorsToBan";
+		return getName() + " punishableCensorsToKick punishableCensorsToBan (true|false)";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Sets the amount of censors of punishable words that triggers a kick or a ban of a user.";
+		return "Sets the amount of censors of punishable words that triggers a kick or a ban of a user and if the bot " +
+				"should censor Discord invite links.";
 	}
 
 	@Override
@@ -44,21 +45,24 @@ class CensorSettings extends CommandImpl {
 		final Optional<DiscordGuild> discordGuildOpt = guildRepo.findById(guildId);
 		final DiscordGuild dcGuild = discordGuildOpt.orElseGet(() -> createDiscordGuild(guildId));
 		final String[] tokens = content.split(" ");
-		if (tokens.length <= 2) {
+		if (tokens.length <= 3) {
 			sendErrorMessage(event.getChannel(), "Pleas use the correct syntax!");
 			return;
 		}
 
-		final String censorsToKickText = tokens[tokens.length - 2];
-		final String censorsToBanText = tokens[tokens.length - 1];
+		final String censorsToKickText = tokens[tokens.length - 3];
+		final String censorsToBanText = tokens[tokens.length - 2];
+		final String censorInvitesText = tokens[tokens.length - 1];
 		final long censorsToKick = Math.max(0, ParseUtil.safelyParseStringToLong(censorsToKickText));
 		final long censorsToBan = Math.max(0, ParseUtil.safelyParseStringToLong(censorsToBanText));
+		final boolean censorInvites = censorInvitesText.equalsIgnoreCase("true");
 		if (censorsToKick < 0 || censorsToBan < 0) {
 			sendErrorMessage(event.getChannel(), "Please use valid values (>= 0)!");
 		}
 
 		dcGuild.setCensorKickThreshold(censorsToKick);
 		dcGuild.setCensorBanThreshold(censorsToBan);
+		dcGuild.setCensorInvites(censorInvites);
 		guildRepo.save(dcGuild);
 		answer(event.getChannel(), "Updated the censor settings.");
 	}
