@@ -65,6 +65,7 @@ class DeleteBadWord extends CommandImpl {
 	}
 
 	private void deleteMentionedWords(final TextChannel channel, final DiscordGuild dcGuild, final List<String> badWords) {
+		final StringBuilder sb = new StringBuilder();
 		for (String badWord : badWords) {
 			if (badWord.isBlank()) {
 				continue;
@@ -78,11 +79,13 @@ class DeleteBadWord extends CommandImpl {
 
 			for (BadWord badWordMatch : badWordMatches) {
 				badWordRepo.delete(badWordMatch);
+				sb.append("\"").append(badWordMatch.getWord()).append("\"\n");
 			}
 		}
 
-		answer(channel, "Removed the mentioned words from the database.");
+		if (sb.length() > 0) {
+			sb.setLength(sb.length() - 1);
+			answer(channel, "Removed the following words from the database:\n" + sb);
+		}
 	}
-
-
 }
