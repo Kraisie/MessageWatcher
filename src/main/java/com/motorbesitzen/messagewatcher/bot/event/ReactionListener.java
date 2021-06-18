@@ -163,6 +163,6 @@ public class ReactionListener extends ListenerAdapter {
 			}
 		}
 
-		reportChannel.sendMessage(reportEmbed.build()).queue();
+		reportChannel.sendMessageEmbeds(reportEmbed.build()).queue();
 	}
 }
