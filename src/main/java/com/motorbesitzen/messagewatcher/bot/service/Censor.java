@@ -51,32 +51,6 @@ public class Censor {
 		this.memberRepo = memberRepo;
 	}
 
-//	private String censorWordPart(final DiscordGuild dcGuild, final DiscordMember dcMember, final String wordPart) {
-//		String newPart = wordPart;
-//		for (BadWord badWord : dcGuild.getBadWordsOrderdByWordLengthDesc()) {
-//			final Pattern pattern = badWord.isWildcard() ?
-//					Pattern.compile("(?i)" + badWord.getWord()) :                            // (?i) to ignore case
-//					Pattern.compile("(?i)(^|(?<=[\\p{S}\\p{P}\\p{C}\\s]))" + badWord.getWord() + "((?=[\\p{S}\\p{P}\\p{C}\\s])|$)");
-//
-//			final String replacement = badWord.getReplacement();
-//			final Matcher matcher = pattern.matcher(newPart);
-//			final StringBuilder sb = new StringBuilder();
-//			while (matcher.find()) {
-//				matcher.appendReplacement(sb, replacement);
-//				dcMember.increaseWordCensorCount();
-//
-//				if (badWord.isPunishable()) {
-//					dcMember.increaseWarningCount();
-//				}
-//			}
-//
-//			matcher.appendTail(sb);
-//			newPart = sb.toString();
-//		}
-//
-//		return newPart;
-//	}
-
 	@Transactional
 	public void censorMessage(final Message message) {
 		final Guild guild = message.getGuild();
@@ -98,14 +72,17 @@ public class Censor {
 		censoredContent = censorContent(dcGuild, dcMember, censoredContent);
 		if (isMessageCensored(originalContent, censoredContent)) {
 			final Member self = guild.getSelfMember();
+			final List<Message.Attachment> attachments = message.getAttachments();
+			final Message.Attachment imageAttachment = getImageAttachment(attachments);
 			if (originalWarnCount == dcMember.getWarningCount()) {
 				if (self.hasPermission(Permission.MANAGE_WEBHOOKS)) {
-					replaceMessageWebhook(message, censoredContent);
+					replaceMessageWebhook(message, censoredContent, imageAttachment);
 				} else {
-					replaceMessageEmbed(message, censoredContent, null);
+					replaceMessageEmbed(message, censoredContent, null, imageAttachment);
 				}
 			} else {
-				replaceMessageEmbed(message, censoredContent, "You have used a punishable word. Be aware that further usage will be punished!");
+				replaceMessageEmbed(message, censoredContent,
+						"You have used a punishable word. Be aware that further usage will be punished!", imageAttachment);
 				if (dcGuild.getCensorBanThreshold() > 0 && originalWarnCount != dcMember.getWarningCount() &&
 						dcMember.getWarningCount() >= dcGuild.getCensorBanThreshold()) {
 					banMember(guild, dcGuild, dcMember);
@@ -322,7 +299,7 @@ public class Censor {
 		return !originalNoFormat.equalsIgnoreCase(resultNoFormat);
 	}
 
-	private void replaceMessageWebhook(final Message message, final String newMessage) {
+	private void replaceMessageWebhook(final Message message, final String newMessage, final Message.Attachment imageAttachment) {
 		final TextChannel channel = message.getTextChannel();
 		final Member author = message.getMember();
 		if (author == null) {
@@ -341,40 +318,61 @@ public class Censor {
 					if (webhooks.size() == 0) {
 						channel.createWebhook("censor").queue(
 								fakeWebhook -> message.delete().queue(
-										v -> sendWebhookMessage(fakeWebhook, author, newReply),
-										throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!")
+										v -> sendWebhookMessage(fakeWebhook, author, newReply, imageAttachment),
+										throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!", imageAttachment)
 								)
 						);
 					} else {
 						message.delete().queue(
-								v -> sendWebhookMessage(webhooks.get(0), author, newReply),
-								throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!")
+								v -> sendWebhookMessage(webhooks.get(0), author, newReply, imageAttachment),
+								throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!", imageAttachment)
 						);
 					}
 				}
 		);
 	}
 
-	private void sendWebhookMessage(final Webhook fakeWebhook, final Member author, final String newMessage) {
+	private Message.Attachment getImageAttachment(final List<Message.Attachment> attachments) {
+		if (attachments.size() == 0) {
+			return null;
+		}
+
+		for (Message.Attachment attachment : attachments) {
+			if (attachment.isImage()) {
+				return attachment;
+			}
+		}
+
+		return null;
+	}
+
+	private void sendWebhookMessage(final Webhook fakeWebhook, final Member author, final String newMessage,
+									final Message.Attachment imageAttachment) {
 		final WebhookClient client = WebhookClient.withUrl(fakeWebhook.getUrl());
 		final WebhookMessageBuilder builder = new WebhookMessageBuilder();
 		final AllowedMentions noMassPings = new AllowedMentions().withParseEveryone(false).withParseRoles(false).withParseUsers(true);
-		builder.setUsername(author.getEffectiveName());
-		builder.setAvatarUrl(author.getUser().getEffectiveAvatarUrl());
-		builder.setContent(getWrappedMessage(newMessage));
-		builder.setAllowedMentions(noMassPings);
+		builder.setUsername(author.getEffectiveName())
+				.setAvatarUrl(author.getUser().getEffectiveAvatarUrl())
+				.setContent(getWrappedMessage(newMessage))
+				.setAllowedMentions(noMassPings);
+
+		if (imageAttachment != null) {
+			builder.append("\n" + imageAttachment.getProxyUrl());
+		}
+
 		client.send(builder.build());
 		client.close();
 	}
 
-	private void replaceMessageEmbed(final Message message, final String newMessage, final String warnMessage) {
+	private void replaceMessageEmbed(final Message message, final String newMessage, final String warnMessage,
+									 final Message.Attachment imageAttachment) {
 		final TextChannel channel = message.getTextChannel();
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setColor(envSettings.getEmbedColor());
 		eb.setAuthor(message.getAuthor().getName(), null, message.getAuthor().getEffectiveAvatarUrl());
 		eb.setTitle("Message censored:").setDescription(getWrappedMessage(newMessage));
 		eb.setFooter(warnMessage);
-		addAttachment(eb, message);
+		addAttachment(eb, imageAttachment);
 		tryCensor(channel, message, eb);
 	}
 
@@ -395,12 +393,12 @@ public class Censor {
 			);
 
 			if (repliedMessage != null) {
-				repliedMessage.reply(eb.build()).mentionRepliedUser(false).queue(
+				repliedMessage.replyEmbeds(eb.build()).mentionRepliedUser(false).queue(
 						v -> LogUtil.logDebug("Sent replacement message."),
 						throwable -> LogUtil.logError("Could not send censored message!", throwable)
 				);
 			} else {
-				channel.sendMessage(eb.build()).queue(
+				channel.sendMessageEmbeds(eb.build()).queue(
 						v -> LogUtil.logDebug("Sent replacement message."),
 						throwable -> LogUtil.logError("Could not send censored message!", throwable)
 				);
@@ -412,13 +410,11 @@ public class Censor {
 		}
 	}
 
-	private void addAttachment(final EmbedBuilder eb, final Message message) {
-		final List<Message.Attachment> attachments = message.getAttachments();
-		if (attachments.size() == 0) {
+	private void addAttachment(final EmbedBuilder eb, final Message.Attachment attachment) {
+		if (attachment == null) {
 			return;
 		}
 
-		final Message.Attachment attachment = attachments.get(0);
 		if (attachment.isImage()) {
 			eb.setImage(attachment.getProxyUrl());
 		}
