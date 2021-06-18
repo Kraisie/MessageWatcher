@@ -72,8 +72,7 @@ public class Censor {
 		censoredContent = censorContent(dcGuild, dcMember, censoredContent);
 		if (isMessageCensored(originalContent, censoredContent)) {
 			final Member self = guild.getSelfMember();
-			final List<Message.Attachment> attachments = message.getAttachments();
-			final Message.Attachment imageAttachment = getImageAttachment(attachments);
+			final Message.Attachment imageAttachment = getImageAttachment(message);
 			if (originalWarnCount == dcMember.getWarningCount()) {
 				if (self.hasPermission(Permission.MANAGE_WEBHOOKS)) {
 					replaceMessageWebhook(message, censoredContent, imageAttachment);
@@ -332,8 +331,18 @@ public class Censor {
 		);
 	}
 
-	private Message.Attachment getImageAttachment(final List<Message.Attachment> attachments) {
+	private Message.Attachment getImageAttachment(final Message message) {
+		final List<Message.Attachment> attachments = message.getAttachments();
 		if (attachments.size() == 0) {
+			return null;
+		}
+
+		final Member author = message.getMember();
+		if (author == null) {
+			return null;
+		}
+
+		if (!canPostImages(author)) {
 			return null;
 		}
 
@@ -344,6 +353,10 @@ public class Censor {
 		}
 
 		return null;
+	}
+
+	private boolean canPostImages(final Member author) {
+		return author.hasPermission(Permission.MESSAGE_ATTACH_FILES);
 	}
 
 	private void sendWebhookMessage(final Webhook fakeWebhook, final Member author, final String newMessage,
