@@ -342,7 +342,8 @@ public class Censor {
 			return null;
 		}
 
-		if (!canPostImages(author)) {
+		final TextChannel channel = message.getTextChannel();
+		if (!canPostImages(author, channel)) {
 			return null;
 		}
 
@@ -355,8 +356,8 @@ public class Censor {
 		return null;
 	}
 
-	private boolean canPostImages(final Member author) {
-		return author.hasPermission(Permission.MESSAGE_ATTACH_FILES);
+	private boolean canPostImages(final Member author, final TextChannel channel) {
+		return author.hasPermission(channel, Permission.MESSAGE_ATTACH_FILES);
 	}
 
 	private void sendWebhookMessage(final Webhook fakeWebhook, final Member author, final String newMessage,
@@ -373,8 +374,24 @@ public class Censor {
 			builder.append("\n" + imageAttachment.getProxyUrl());
 		}
 
-		client.send(builder.build());
+		final TextChannel channel = fakeWebhook.getChannel();
+		client.send(builder.build()).thenAcceptAsync(
+				webhookReadOnlyMessage -> {
+					if (!canEmbedLinks(author, channel)) {
+						channel.retrieveMessageById(webhookReadOnlyMessage.getId()).queue(
+								webhookMessage -> webhookMessage.suppressEmbeds(true).queue(
+										v -> LogUtil.logDebug("Suppressed link embed in webhook."),
+										throwable -> LogUtil.logDebug("Can not suppress link embed:", throwable)
+								)
+						);
+					}
+				}
+		);
 		client.close();
+	}
+
+	private boolean canEmbedLinks(final Member author, final TextChannel channel) {
+		return author.hasPermission(channel, Permission.MESSAGE_EMBED_LINKS);
 	}
 
 	private void replaceMessageEmbed(final Message message, final String newMessage, final String warnMessage,
