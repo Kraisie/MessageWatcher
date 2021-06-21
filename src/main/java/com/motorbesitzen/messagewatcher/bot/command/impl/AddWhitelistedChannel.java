@@ -54,7 +54,7 @@ class AddWhitelistedChannel extends CommandImpl {
 		}
 
 		authorizeChannels(dcGuild, mentionedChannels);
-		answer(event.getChannel(), "Authorized mentioned channels.");
+		answer(event.getChannel(), "Whitelisted mentioned channels.");
 	}
 
 	private DiscordGuild createDiscordGuild(final long guildId) {
