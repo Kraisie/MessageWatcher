@@ -171,7 +171,7 @@ all. Maximum length of this text is 128 characters!
 #### BOT_ACTIVITY_STREAMING_URL
 
 A link to a stream, only needs to be set if the streaming activity is used. Has to be valid according to Discord
-standards, so it needs to include the "https(s)://" at the start. Discord only supports twitch and YouTube links at the
+standards, so it needs to include the "http(s)://" at the start. Discord only supports twitch and YouTube links at the
 moment.
 
 ### Database
