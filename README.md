@@ -1,7 +1,7 @@
 # MessageWatcher
 
-This is a Discord bot which censors messages with specific words or links it instead of deleting them completely like
-other bots.
+This is a Discord bot which censors messages that contain specific words or links instead of deleting them completely
+like other bots.
 
 ## Setup
 
@@ -32,6 +32,7 @@ down and select all needed permissions:
 
 ```text
 Kick Members
+Ban Members
 Manage Webhooks
 View Channels
 Send Messages
@@ -66,7 +67,6 @@ The environment variables carry some information for the bot to use. To get your
 called `.env` in the same location where this file is located and add the following text to it:
 
 ```dotenv
-DB_DATABASE=
 DB_ROOT_PASSWORD=
 DB_USER=
 DB_PASSWORD=
@@ -92,12 +92,6 @@ met:
 
 Settings that have to be set are marked with `[REQUIRED]`. If you leave these blank the program will not work correctly
 and mostly will not even start completely.
-
-#### DB_DATABASE
-
-This setting defines the name of the database. If you do not set a value the default name "database" will be chosen. If
-you change that value later on and do not rename the files in `/data/` accordingly the program will create a new
-database!
 
 #### [REQUIRED] DB_ROOT_PASSWORD
 
@@ -173,36 +167,6 @@ all. Maximum length of this text is 128 characters!
 A link to a stream, only needs to be set if the streaming activity is used. Has to be valid according to Discord
 standards, so it needs to include the "http(s)://" at the start. Discord only supports twitch and YouTube links at the
 moment.
-
-### Database
-
-#### Creation
-
-On the first start the program has to create the database which needs some action on your side. To perform that setup,
-add the following line to the `.env` file:
-
-```dotenv
-SPRING_PROFILES_ACTIVE=firststart
-```
-
-Afterwards start the bot as described in
-[starting and stopping the bot](#starting-and-stopping-the-bot). Wait until the bot is shown as online in Discord and
-stop the program as described in the same section. Now remove the line you added to the `.env` file. \
-Your database is now set up, and you can start and stop the program as you like. However, do not add the line back
-to `.env` as that will lead to the program creating the database again and thus deleting all your data!
-
-#### Update
-
-If you need to update the database at some point add the following line to the `.env` file:
-
-```dotenv
-SPRING_PROFILES_ACTIVE=updatedb
-```
-
-Afterwards start the bot as described in
-[starting and stopping the bot](#starting-and-stopping-the-bot). Wait until the bot is shown as online in Discord and
-stop the program as described in the same section. Now remove the line you added to the `.env` file. \
-Your database schema is now updated and you can start the bot like normal.
 
 ## Starting and stopping the bot
 
@@ -283,14 +247,4 @@ public class SomeEventListener extends ListenerAdapter {
   // ...
 }
 ```
-
-### Decisions
-
-#### Why does this program use `Long` for the Discord IDs?
-
-The Java part of this program takes Discord IDs as `Long` so the maximum ID is 9223372036854775807. If Discord does not
-change its system and still uses the Twitter snowflake ID system then this ID will be reached around June 2084. If for
-whatever reason Discord, the used technologies or this code should still be around at that time the code has to be
-changed to accept `BigInteger` to avoid overflows while handling IDs as Discord uses the full 2<sup>64</sup>
-range while the Java `Long` only uses 2<sup>63</sup>-1. 
 
