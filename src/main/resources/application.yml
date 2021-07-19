@@ -18,7 +18,7 @@ spring:
       enabled: false
 logging:
   file:
-    name: "MwLog"
+    name: "logs/MwLog"
   level:
     org:
       apache: warn
