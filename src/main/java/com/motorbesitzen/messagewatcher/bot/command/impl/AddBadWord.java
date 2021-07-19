@@ -87,7 +87,7 @@ class AddBadWord extends CommandImpl {
 		final String word = badWordProperties.get(0);
 		final String replacement =
 				badWordProperties.get(1).isBlank() ?
-						"\\*\\*\\*" :
+						"\\\\*\\\\*\\\\*" :
 						badWordProperties.get(1);
 		final boolean wildcard = badWordProperties.get(2).equalsIgnoreCase("true");
 		final boolean punishable = badWordProperties.get(3).equalsIgnoreCase("true");
