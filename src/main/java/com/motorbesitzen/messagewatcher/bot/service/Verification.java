@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.Optional;
 
 @Service
@@ -138,6 +139,7 @@ public class Verification {
 				.setTitle("Verification required!")
 				.setAuthor(author.getName(), null, author.getEffectiveAvatarUrl())
 				.setDescription(content)
+				.setColor(new Color(222, 105, 12))
 				.build();
 	}
 }

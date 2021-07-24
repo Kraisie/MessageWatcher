@@ -109,6 +109,7 @@ public class ReactionListener extends ListenerAdapter {
 		final long originalMessageId = messageVerification.getOriginalMessageId();
 		final String originalContent = messageVerification.getMessageContent();
 		editWebhookMessage(originalChannel, originalMessageId, originalContent);
+		editEmbedColor(guild, messageVerification, "Message verified!", Color.green);
 		message.clearReactions().queue();
 		verificationRepo.delete(messageVerification);
 	}
@@ -118,12 +119,14 @@ public class ReactionListener extends ListenerAdapter {
 		final long originalChannelId = messageVerification.getOriginalChannelId();
 		final TextChannel originalChannel = guild.getTextChannelById(originalChannelId);
 		if (originalChannel == null) {
+			message.reply("The channel does not exist anymore!").queue();
 			return;
 		}
 
 		final long originalMessageId = messageVerification.getOriginalMessageId();
 		editWebhookMessage(originalChannel, originalMessageId,
 				"**<VERIFICATION DENIED>**\n\nThis content has been disapproved by staff.");
+		editEmbedColor(guild, messageVerification, "Verification denied!", Color.red);
 		message.clearReactions().queue();
 		verificationRepo.delete(messageVerification);
 	}
@@ -146,6 +149,43 @@ public class ReactionListener extends ListenerAdapter {
 					}
 				}
 		);
+	}
+
+	private void editEmbedColor(final Guild guild, final MessageVerification messageVerification, final String title, final Color color) {
+		final long verifyChannelId = messageVerification.getGuild().getVerifyChannelId();
+		final TextChannel verifyChannel = guild.getTextChannelById(verifyChannelId);
+		if (verifyChannel == null) {
+			return;
+		}
+
+		verifyChannel.retrieveMessageById(messageVerification.getVerifyMessageId()).queue(
+				verifyMessage -> editEmbed(verifyMessage, title, color)
+		);
+	}
+
+	private void editEmbed(final Message verifyMessage, final String title, final Color color) {
+		final List<MessageEmbed> embeds = verifyMessage.getEmbeds();
+		if (embeds.size() == 0) {
+			return;
+		}
+
+		final MessageEmbed embed = embeds.get(0);
+		final MessageEmbed newEmbed = changeColor(embed, title, color);
+		verifyMessage.editMessageEmbeds(newEmbed).queue();
+	}
+
+	private MessageEmbed changeColor(final MessageEmbed embed, final String title, final Color color) {
+		final EmbedBuilder eb = new EmbedBuilder();
+		eb.setTitle(title)
+				.setColor(color)
+				.setDescription(embed.getDescription());
+
+		final MessageEmbed.AuthorInfo authorInfo = embed.getAuthor();
+		if (authorInfo != null) {
+			eb.setAuthor(authorInfo.getName(), authorInfo.getUrl(), authorInfo.getIconUrl());
+		}
+
+		return eb.build();
 	}
 
 	private void handleReport(final GuildMessageReactionAddEvent event, final Message message) {
