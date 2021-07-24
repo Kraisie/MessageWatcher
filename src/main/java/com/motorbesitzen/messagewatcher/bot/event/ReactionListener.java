@@ -2,9 +2,11 @@ package com.motorbesitzen.messagewatcher.bot.event;
 
 import club.minnced.discord.webhook.WebhookClient;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
+import com.motorbesitzen.messagewatcher.data.dao.DiscordMember;
 import com.motorbesitzen.messagewatcher.data.dao.MessageVerification;
 import com.motorbesitzen.messagewatcher.data.dao.ModRole;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
+import com.motorbesitzen.messagewatcher.data.repo.DiscordMemberRepo;
 import com.motorbesitzen.messagewatcher.data.repo.MessageVerificationRepo;
 import com.motorbesitzen.messagewatcher.data.repo.ModRoleRepo;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
@@ -25,12 +27,15 @@ import java.util.Optional;
 public class ReactionListener extends ListenerAdapter {
 
 	private final DiscordGuildRepo guildRepo;
+	private final DiscordMemberRepo memberRepo;
 	private final ModRoleRepo roleRepo;
 	private final MessageVerificationRepo verificationRepo;
 
 	@Autowired
-	ReactionListener(final DiscordGuildRepo guildRepo, final ModRoleRepo roleRepo, final MessageVerificationRepo verificationRepo) {
+	ReactionListener(final DiscordGuildRepo guildRepo, final DiscordMemberRepo memberRepo, final ModRoleRepo roleRepo,
+					 final MessageVerificationRepo verificationRepo) {
 		this.guildRepo = guildRepo;
+		this.memberRepo = memberRepo;
 		this.roleRepo = roleRepo;
 		this.verificationRepo = verificationRepo;
 	}
@@ -87,14 +92,33 @@ public class ReactionListener extends ListenerAdapter {
 		final MessageReaction.ReactionEmote emote = event.getReactionEmote();
 		if (emote.isEmoji()) {
 			final String emoji = emote.getEmoji();
-			if (emoji.equals("✅")) {
-				handleMessageVerificationAccept(message, messageVerification, event.getUser().getAsTag());
-			} else if (emoji.equals("❌")) {
-				handleMessageVerificationDecline(message, messageVerification, event.getUser().getAsTag());
-			} else {
-				message.removeReaction((Emote) emote).queue();
+			switch (emoji) {
+				case "\u262E️":
+					retrust(event);
+				case "✅":
+					handleMessageVerificationAccept(message, messageVerification, event.getUser().getAsTag());
+					break;
+				case "❌":
+					handleMessageVerificationDecline(message, messageVerification, event.getUser().getAsTag());
+					break;
+				default:
+					message.removeReaction(emoji).queue();
+					break;
 			}
 		}
+	}
+
+	private void retrust(final GuildMessageReactionAddEvent event) {
+		final Guild guild = event.getGuild();
+		final long guildId = guild.getIdLong();
+		final User user = event.getUser();
+		final long userId = user.getIdLong();
+		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(userId, guildId);
+		dcMemberOpt.ifPresent(dcMember -> {
+			dcMember.setUntrusted(false);
+			memberRepo.save(dcMember);
+			event.getChannel().sendMessage("Revoked untrusted status of " + user.getAsMention()).queue();
+		});
 	}
 
 	private void handleMessageVerificationAccept(final Message message, final MessageVerification messageVerification, final String username) {

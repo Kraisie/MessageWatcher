@@ -136,7 +136,9 @@ public class Verification {
 					messageVerification.setVerifyMessageId(verificationMessageId);
 					verificationRepo.save(messageVerification);
 					msg.addReaction("✅").queue(
-							v -> msg.addReaction("❌").queue()
+							v -> msg.addReaction("❌").queue(
+									w -> msg.addReaction("☮️").queue()
+							)
 					);
 				}
 		);
