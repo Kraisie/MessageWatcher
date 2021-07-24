@@ -53,6 +53,9 @@ class UntrustMember extends CommandImpl {
 		final DiscordMember dcMember = dcMemberOpt.orElseGet(() -> DiscordMember.createDefault(mentionedMemberId, DiscordGuild.createDefault(guild.getIdLong())));
 		dcMember.setUntrusted(!dcMember.isUntrusted());
 		memberRepo.save(dcMember);
-		answer(channel, (dcMember.isUntrusted() ? "Added untrusted status to member." : "Revoked untrusted status of member."));
+		answer(channel, (dcMember.isUntrusted() ?
+				"Added untrusted status to <@" + mentionedMemberId + ">." :
+				"Revoked untrusted status of <@" + mentionedMemberId + ">.")
+		);
 	}
 }
