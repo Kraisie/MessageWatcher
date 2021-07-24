@@ -95,10 +95,10 @@ public class ReactionListener extends ListenerAdapter {
 			switch (emoji) {
 				case "\u262E️":
 					retrust(event);
-				case "✅":
+				case "\u2705":
 					handleMessageVerificationAccept(message, messageVerification, event.getUser().getAsTag());
 					break;
-				case "❌":
+				case "\u274C":
 					handleMessageVerificationDecline(message, messageVerification, event.getUser().getAsTag());
 					break;
 				default:
