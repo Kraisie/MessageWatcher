@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -49,7 +50,7 @@ public class Verification {
 	}
 
 	private MessageVerification createMessageVerification(final Message message) {
-		final String content = message.getContentRaw();
+		final String content = buildContentDisplay(message);
 		final Guild guild = message.getGuild();
 		final long guildId = guild.getIdLong();
 		final Optional<DiscordGuild> dcGuildOpt = guildRepo.findById(guildId);
@@ -61,6 +62,21 @@ public class Verification {
 		final MessageVerification messageVerification = new MessageVerification(sender, content, dcGuild);
 		verificationRepo.save(messageVerification);
 		return messageVerification;
+	}
+
+	private String buildContentDisplay(final Message message) {
+		final List<Message.Attachment> attachments = message.getAttachments();
+		return attachments.size() == 0 ?
+				getWrappedContent(message.getContentRaw()) :
+				getWrappedContent(message.getContentRaw()) + "\n\nAttachment: " + attachments.get(0).getProxyUrl();
+	}
+
+	private String getWrappedContent(final String contentRaw) {
+		if (contentRaw.length() < 3800) {
+			return contentRaw;
+		}
+
+		return contentRaw.substring(0, 3800) + "...\n";
 	}
 
 	private void sendVerifyInformation(final GuildMessageReceivedEvent event, final MessageVerification messageVerification) {
@@ -109,9 +125,7 @@ public class Verification {
 			return;
 		}
 
-		final Message message = event.getMessage();
-		final String content = message.getContentRaw();
-		final MessageEmbed embed = buildEmbed(content, event.getAuthor());
+		final MessageEmbed embed = buildEmbed(event);
 		verifyChannel.sendMessageEmbeds(embed).queue(
 				msg -> {
 					final long originalChannelId = webhookMessage.getChannelId();
@@ -134,9 +148,21 @@ public class Verification {
 		return dcGuild;
 	}
 
-	private MessageEmbed buildEmbed(final String content, final User author) {
-		return new EmbedBuilder()
-				.setTitle("Verification required!")
+	private MessageEmbed buildEmbed(final GuildMessageReceivedEvent event) {
+		final User author = event.getAuthor();
+		final Message message = event.getMessage();
+		String content = getWrappedContent(message.getContentRaw());
+
+		final EmbedBuilder eb = new EmbedBuilder();
+		final List<Message.Attachment> attachments = message.getAttachments();
+		if (attachments.size() != 0) {
+			final Message.Attachment attachment = attachments.get(0);
+			if (attachment.isImage()) {
+				eb.setImage(attachment.getProxyUrl());
+			}
+		}
+
+		return eb.setTitle("Verification required!")
 				.setAuthor(author.getName(), null, author.getEffectiveAvatarUrl())
 				.setDescription(content)
 				.setColor(new Color(222, 105, 12))

@@ -186,6 +186,11 @@ public class ReactionListener extends ListenerAdapter {
 			eb.setAuthor(authorInfo.getName(), authorInfo.getUrl(), authorInfo.getIconUrl());
 		}
 
+		final MessageEmbed.ImageInfo imageInfo = embed.getImage();
+		if (imageInfo != null) {
+			eb.setImage(imageInfo.getProxyUrl());
+		}
+
 		return eb.build();
 	}
 
