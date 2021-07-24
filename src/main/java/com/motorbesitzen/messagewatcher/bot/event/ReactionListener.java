@@ -88,16 +88,16 @@ public class ReactionListener extends ListenerAdapter {
 		if (emote.isEmoji()) {
 			final String emoji = emote.getEmoji();
 			if (emoji.equals("✅")) {
-				handleMessageVerificationAccept(message, messageVerification);
+				handleMessageVerificationAccept(message, messageVerification, event.getUser().getAsTag());
 			} else if (emoji.equals("❌")) {
-				handleMessageVerificationDecline(message, messageVerification);
+				handleMessageVerificationDecline(message, messageVerification, event.getUser().getAsTag());
 			} else {
 				message.removeReaction((Emote) emote).queue();
 			}
 		}
 	}
 
-	private void handleMessageVerificationAccept(final Message message, final MessageVerification messageVerification) {
+	private void handleMessageVerificationAccept(final Message message, final MessageVerification messageVerification, final String username) {
 		final Guild guild = message.getGuild();
 		final long originalChannelId = messageVerification.getOriginalChannelId();
 		final TextChannel originalChannel = guild.getTextChannelById(originalChannelId);
@@ -109,12 +109,12 @@ public class ReactionListener extends ListenerAdapter {
 		final long originalMessageId = messageVerification.getOriginalMessageId();
 		final String originalContent = messageVerification.getMessageContent();
 		editWebhookMessage(originalChannel, originalMessageId, originalContent);
-		editEmbedColor(guild, messageVerification, "Message verified!", Color.green);
+		editEmbedColor(guild, messageVerification, "Message verified!", username, Color.green);
 		message.clearReactions().queue();
 		verificationRepo.delete(messageVerification);
 	}
 
-	private void handleMessageVerificationDecline(final Message message, final MessageVerification messageVerification) {
+	private void handleMessageVerificationDecline(final Message message, final MessageVerification messageVerification, final String username) {
 		final Guild guild = message.getGuild();
 		final long originalChannelId = messageVerification.getOriginalChannelId();
 		final TextChannel originalChannel = guild.getTextChannelById(originalChannelId);
@@ -126,7 +126,7 @@ public class ReactionListener extends ListenerAdapter {
 		final long originalMessageId = messageVerification.getOriginalMessageId();
 		editWebhookMessage(originalChannel, originalMessageId,
 				"**<VERIFICATION DENIED>**\n\nThis content has been disapproved by staff.");
-		editEmbedColor(guild, messageVerification, "Verification denied!", Color.red);
+		editEmbedColor(guild, messageVerification, "Verification denied!", username, Color.red);
 		message.clearReactions().queue();
 		verificationRepo.delete(messageVerification);
 	}
@@ -151,7 +151,7 @@ public class ReactionListener extends ListenerAdapter {
 		);
 	}
 
-	private void editEmbedColor(final Guild guild, final MessageVerification messageVerification, final String title, final Color color) {
+	private void editEmbedColor(final Guild guild, final MessageVerification messageVerification, final String title, final String username, final Color color) {
 		final long verifyChannelId = messageVerification.getGuild().getVerifyChannelId();
 		final TextChannel verifyChannel = guild.getTextChannelById(verifyChannelId);
 		if (verifyChannel == null) {
@@ -159,26 +159,27 @@ public class ReactionListener extends ListenerAdapter {
 		}
 
 		verifyChannel.retrieveMessageById(messageVerification.getVerifyMessageId()).queue(
-				verifyMessage -> editEmbed(verifyMessage, title, color)
+				verifyMessage -> editEmbed(verifyMessage, title, username, color)
 		);
 	}
 
-	private void editEmbed(final Message verifyMessage, final String title, final Color color) {
+	private void editEmbed(final Message verifyMessage, final String title, final String username, final Color color) {
 		final List<MessageEmbed> embeds = verifyMessage.getEmbeds();
 		if (embeds.size() == 0) {
 			return;
 		}
 
 		final MessageEmbed embed = embeds.get(0);
-		final MessageEmbed newEmbed = changeColor(embed, title, color);
+		final MessageEmbed newEmbed = editInfo(embed, title, username, color);
 		verifyMessage.editMessageEmbeds(newEmbed).queue();
 	}
 
-	private MessageEmbed changeColor(final MessageEmbed embed, final String title, final Color color) {
+	private MessageEmbed editInfo(final MessageEmbed embed, final String title, final String username, final Color color) {
 		final EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle(title)
 				.setColor(color)
-				.setDescription(embed.getDescription());
+				.setDescription(embed.getDescription())
+				.setFooter("processed by " + username);
 
 		final MessageEmbed.AuthorInfo authorInfo = embed.getAuthor();
 		if (authorInfo != null) {
