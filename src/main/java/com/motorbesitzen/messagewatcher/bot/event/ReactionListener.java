@@ -1,9 +1,15 @@
 package com.motorbesitzen.messagewatcher.bot.event;
 
+import club.minnced.discord.webhook.WebhookClient;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
+import com.motorbesitzen.messagewatcher.data.dao.MessageVerification;
+import com.motorbesitzen.messagewatcher.data.dao.ModRole;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
+import com.motorbesitzen.messagewatcher.data.repo.MessageVerificationRepo;
+import com.motorbesitzen.messagewatcher.data.repo.ModRoleRepo;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -19,14 +25,22 @@ import java.util.Optional;
 public class ReactionListener extends ListenerAdapter {
 
 	private final DiscordGuildRepo guildRepo;
+	private final ModRoleRepo roleRepo;
+	private final MessageVerificationRepo verificationRepo;
 
 	@Autowired
-	ReactionListener(final DiscordGuildRepo guildRepo) {
+	ReactionListener(final DiscordGuildRepo guildRepo, final ModRoleRepo roleRepo, final MessageVerificationRepo verificationRepo) {
 		this.guildRepo = guildRepo;
+		this.roleRepo = roleRepo;
+		this.verificationRepo = verificationRepo;
 	}
 
 	@Override
 	public void onGuildMessageReactionAdd(final GuildMessageReactionAddEvent event) {
+		if (event.getUser().isBot()) {
+			return;
+		}
+
 		event.getChannel().retrieveMessageById(event.getMessageIdLong()).queue(
 				msg -> handleReaction(event, msg),
 				throwable -> LogUtil.logDebug("Could not retrieve message of react with ID " + event.getMessageIdLong(), throwable)
@@ -34,6 +48,107 @@ public class ReactionListener extends ListenerAdapter {
 	}
 
 	private void handleReaction(final GuildMessageReactionAddEvent event, final Message message) {
+		final Guild guild = event.getGuild();
+		final long guildId = guild.getIdLong();
+		final long messageId = message.getIdLong();
+		final Optional<MessageVerification> messageVerificationOpt = verificationRepo.findByVerifyMessageIdAndGuild_GuildId(messageId, guildId);
+		if (messageVerificationOpt.isPresent() && isAuthorized(event.getMember())) {
+			if (!isAuthorized(event.getMember())) {
+				message.removeReaction((Emote) event.getReactionEmote(), event.getUser()).queue();
+				return;
+			}
+
+			handleVerification(event, message, messageVerificationOpt.get());
+			return;
+		}
+
+		handleReport(event, message);
+	}
+
+	private boolean isAuthorized(final Member member) {
+		if (member.hasPermission(Permission.ADMINISTRATOR)) {
+			return true;
+		}
+
+		final List<Role> memberRoles = member.getRoles();
+		final List<ModRole> modRoles = roleRepo.findAllByGuild_GuildId(member.getGuild().getIdLong());
+		for (Role memberRole : memberRoles) {
+			for (ModRole modRole : modRoles) {
+				if (memberRole.getIdLong() == modRole.getRoleId()) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private void handleVerification(final GuildMessageReactionAddEvent event, final Message message, final MessageVerification messageVerification) {
+		final MessageReaction.ReactionEmote emote = event.getReactionEmote();
+		if (emote.isEmoji()) {
+			final String emoji = emote.getEmoji();
+			if (emoji.equals("✅")) {
+				handleMessageVerificationAccept(message, messageVerification);
+			} else if (emoji.equals("❌")) {
+				handleMessageVerificationDecline(message, messageVerification);
+			} else {
+				message.removeReaction((Emote) emote).queue();
+			}
+		}
+	}
+
+	private void handleMessageVerificationAccept(final Message message, final MessageVerification messageVerification) {
+		final Guild guild = message.getGuild();
+		final long originalChannelId = messageVerification.getOriginalChannelId();
+		final TextChannel originalChannel = guild.getTextChannelById(originalChannelId);
+		if (originalChannel == null) {
+			message.reply("The channel does not exist anymore!").queue();
+			return;
+		}
+
+		final long originalMessageId = messageVerification.getOriginalMessageId();
+		final String originalContent = messageVerification.getMessageContent();
+		editWebhookMessage(originalChannel, originalMessageId, originalContent);
+		message.clearReactions().queue();
+		verificationRepo.delete(messageVerification);
+	}
+
+	private void handleMessageVerificationDecline(final Message message, final MessageVerification messageVerification) {
+		final Guild guild = message.getGuild();
+		final long originalChannelId = messageVerification.getOriginalChannelId();
+		final TextChannel originalChannel = guild.getTextChannelById(originalChannelId);
+		if (originalChannel == null) {
+			return;
+		}
+
+		final long originalMessageId = messageVerification.getOriginalMessageId();
+		editWebhookMessage(originalChannel, originalMessageId,
+				"**<VERIFICATION DENIED>**\n\nThis content has been disapproved by staff.");
+		message.clearReactions().queue();
+		verificationRepo.delete(messageVerification);
+	}
+
+	private void editWebhookMessage(final TextChannel channel, final long messageId, final String content) {
+		channel.retrieveWebhooks().queue(
+				webhooks -> {
+					if (webhooks.size() == 0) {
+						channel.createWebhook("verification").queue(
+								webhook -> {
+									final WebhookClient client = WebhookClient.withUrl(webhook.getUrl());
+									client.edit(messageId, content);
+									client.close();
+								}
+						);
+					} else {
+						final WebhookClient client = WebhookClient.withUrl(webhooks.get(0).getUrl());
+						client.edit(messageId, content);
+						client.close();
+					}
+				}
+		);
+	}
+
+	private void handleReport(final GuildMessageReactionAddEvent event, final Message message) {
 		final Guild guild = event.getGuild();
 		final long guildId = guild.getIdLong();
 		final Optional<DiscordGuild> discordGuildOpt = guildRepo.findById(guildId);

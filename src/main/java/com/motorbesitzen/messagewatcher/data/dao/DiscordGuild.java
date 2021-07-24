@@ -26,6 +26,10 @@ public class DiscordGuild {
 	private long reportChannelId;
 
 	@Min(0)
+	@ColumnDefault("0")
+	private long verifyChannelId;
+
+	@Min(0)
 	@ColumnDefault("5")
 	private long censorKickThreshold;
 
@@ -50,6 +54,9 @@ public class DiscordGuild {
 
 	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL)
 	private Set<WhitelistedChannel> whitelistedChannels;
+
+	@OneToMany(mappedBy = "guild", cascade = CascadeType.ALL)
+	private Set<MessageVerification> messageVerifications;
 
 	protected DiscordGuild() {
 	}
@@ -97,6 +104,14 @@ public class DiscordGuild {
 
 	public void setReportChannelId(long reportChannelId) {
 		this.reportChannelId = reportChannelId;
+	}
+
+	public long getVerifyChannelId() {
+		return verifyChannelId;
+	}
+
+	public void setVerifyChannelId(long verifyChannelId) {
+		this.verifyChannelId = verifyChannelId;
 	}
 
 	public long getCensorKickThreshold() {
@@ -161,6 +176,14 @@ public class DiscordGuild {
 
 	public void setWhitelistedChannels(Set<WhitelistedChannel> whitelistedChannels) {
 		this.whitelistedChannels = whitelistedChannels;
+	}
+
+	public Set<MessageVerification> getMessageVerifications() {
+		return messageVerifications;
+	}
+
+	public void setMessageVerifications(Set<MessageVerification> messageVerifications) {
+		this.messageVerifications = messageVerifications;
 	}
 
 	public List<BadWord> getBadWordsAlphabeticallyOrderd() {

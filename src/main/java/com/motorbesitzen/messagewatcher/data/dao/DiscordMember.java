@@ -34,6 +34,10 @@ public class DiscordMember {
 	private long warningCount;
 
 	@NotNull
+	@ColumnDefault("false")
+	private boolean untrusted;
+
+	@NotNull
 	@ManyToOne
 	@JoinColumn(name = "guildId")
 	private DiscordGuild guild;
@@ -96,6 +100,14 @@ public class DiscordMember {
 
 	public double getCensorRating() {
 		return (2f * (double) (wordCensorCount + linkCensorCount) + 3f * (double) warningCount) / ((double) messageCount / (double) (2 * (warningCount + 1)));
+	}
+
+	public boolean isUntrusted() {
+		return untrusted;
+	}
+
+	public void setUntrusted(boolean untrusted) {
+		this.untrusted = untrusted;
 	}
 
 	public DiscordGuild getGuild() {
