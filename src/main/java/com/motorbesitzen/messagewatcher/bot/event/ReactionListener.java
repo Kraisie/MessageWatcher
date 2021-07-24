@@ -94,7 +94,7 @@ public class ReactionListener extends ListenerAdapter {
 			final String emoji = emote.getEmoji();
 			switch (emoji) {
 				case "\u262E️":
-					retrust(event);
+					retrust(event, messageVerification);
 				case "\u2705":
 					handleMessageVerificationAccept(message, messageVerification, event.getUser().getAsTag());
 					break;
@@ -108,16 +108,15 @@ public class ReactionListener extends ListenerAdapter {
 		}
 	}
 
-	private void retrust(final GuildMessageReactionAddEvent event) {
+	private void retrust(final GuildMessageReactionAddEvent event, final MessageVerification messageVerification) {
 		final Guild guild = event.getGuild();
 		final long guildId = guild.getIdLong();
-		final User user = event.getUser();
-		final long userId = user.getIdLong();
+		final long userId = messageVerification.getSender().getDiscordId();
 		final Optional<DiscordMember> dcMemberOpt = memberRepo.findByDiscordIdAndGuild_GuildId(userId, guildId);
 		dcMemberOpt.ifPresent(dcMember -> {
 			dcMember.setUntrusted(false);
 			memberRepo.save(dcMember);
-			event.getChannel().sendMessage("Revoked untrusted status of " + user.getAsMention()).queue();
+			event.getChannel().sendMessage("Revoked untrusted status of <@" + dcMember.getDiscordId() + ">.").queue();
 		});
 	}
 
