@@ -34,8 +34,8 @@ class UntrustMember extends CommandImpl {
 
 	@Override
 	public String getDescription() {
-		return "Requires all messages from the mentioned member to get verified in the future. Only works if a " +
-				"verification channel is set!";
+		return "Enables or disables that all messages from the mentioned member need to get verified in the future. " +
+				"Only works if a verification channel is set!";
 	}
 
 	@Override
@@ -44,7 +44,7 @@ class UntrustMember extends CommandImpl {
 		final Message message = event.getMessage();
 		final long mentionedMemberId = DiscordMessageUtil.getMentionedMemberId(message);
 		if (mentionedMemberId == -1) {
-			sendErrorMessage(channel, "Please provide a mention or an ID for the stats command.");
+			sendErrorMessage(channel, "Please provide a mention or an ID.");
 			return;
 		}
 
