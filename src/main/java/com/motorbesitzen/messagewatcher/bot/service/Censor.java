@@ -11,6 +11,7 @@ import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
 import com.motorbesitzen.messagewatcher.data.repo.DiscordMemberRepo;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
@@ -315,21 +316,36 @@ public class Censor {
 
 		channel.retrieveWebhooks().queue(
 				webhooks -> {
-					if (webhooks.size() == 0) {
-						channel.createWebhook("censor").queue(
-								fakeWebhook -> message.delete().queue(
-										v -> sendWebhookMessage(fakeWebhook, author, newReply, imageAttachment),
-										throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!", imageAttachment)
-								)
-						);
-					} else {
-						message.delete().queue(
-								v -> sendWebhookMessage(webhooks.get(0), author, newReply, imageAttachment),
-								throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!", imageAttachment)
-						);
-					}
+					final Optional<Webhook> webhookOpt = getOwnWebhook(channel.getJDA(), webhooks);
+					webhookOpt.ifPresentOrElse(
+							webhook -> message.delete().queue(
+									v -> sendWebhookMessage(webhooks.get(0), author, newReply, imageAttachment),
+									throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!", imageAttachment)
+							),
+							() -> channel.createWebhook("censor").queue(
+									fakeWebhook -> message.delete().queue(
+											v -> sendWebhookMessage(fakeWebhook, author, newReply, imageAttachment),
+											throwable -> replaceMessageEmbed(message, newMessage, "Avoid censored words/links in the future!", imageAttachment)
+									)
+							)
+					);
 				}
 		);
+	}
+
+	private Optional<Webhook> getOwnWebhook(final JDA jda, final List<Webhook> webhooks) {
+		if (webhooks.size() == 0) {
+			return Optional.empty();
+		}
+
+		final long ownUserId = jda.getSelfUser().getIdLong();
+		final Webhook webhook = webhooks.stream().filter(hook -> {
+					User hookOwner = hook.getOwnerAsUser();
+					if (hookOwner == null) return false;
+					return hookOwner.getIdLong() == ownUserId;
+				}
+		).findFirst().orElse(null);
+		return Optional.ofNullable(webhook);
 	}
 
 	private Message.Attachment getImageAttachment(final Message message) {
