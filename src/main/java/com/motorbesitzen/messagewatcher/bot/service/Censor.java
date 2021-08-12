@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.dv8tion.jda.api.utils.MarkdownSanitizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,7 +66,7 @@ public class Censor {
 		final long originalWarnCount = dcMember.getWarningCount();
 		dcMember.increaseMessageCount();
 
-		final String originalContent = message.getContentRaw();
+		final String originalContent = MarkdownSanitizer.sanitize(message.getContentRaw());
 		String censoredContent = originalContent;
 		if (dcGuild.shouldCensorInvites()) {
 			censoredContent = removeInvites(dcMember, originalContent);
