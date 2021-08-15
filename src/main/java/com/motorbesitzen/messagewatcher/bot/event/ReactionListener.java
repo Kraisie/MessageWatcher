@@ -244,6 +244,7 @@ public class ReactionListener extends ListenerAdapter {
 
 		if (isReport(dcGuild, message, reportEmote)) {
 			sendReportMessage(message, reportEmote, dcGuild);
+			message.removeReaction(reportEmote).queue();
 		}
 	}
 
