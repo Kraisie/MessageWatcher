@@ -244,7 +244,7 @@ public class ReactionListener extends ListenerAdapter {
 
 		if (isReport(dcGuild, message, reportEmote)) {
 			sendReportMessage(message, reportEmote, dcGuild);
-			message.removeReaction(reportEmote).queue();
+			removeReportReactions(message, reportEmote);
 		}
 	}
 
@@ -349,5 +349,20 @@ public class ReactionListener extends ListenerAdapter {
 		}
 
 		reportChannel.sendMessageEmbeds(reportEmbed.build()).queue();
+	}
+
+	private void removeReportReactions(final Message message, final Emote reportEmote) {
+		for (MessageReaction reaction : message.getReactions()) {
+			if (reaction.getReactionEmote().getEmote().equals(reportEmote)) {
+				reaction.retrieveUsers().queue(
+						users -> users.forEach(user -> message.removeReaction(reportEmote, user).queue()),
+						throwable -> {
+							LogUtil.logWarning("Could not retrieve users for report. Clearing all reactions!");
+							message.clearReactions().queue();
+						}
+				);
+				break;
+			}
+		}
 	}
 }
