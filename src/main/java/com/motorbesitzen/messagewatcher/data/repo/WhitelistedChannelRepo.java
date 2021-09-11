@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface WhitelistedChannelRepo extends CrudRepository<WhitelistedChannel, Long> {
 	Optional<WhitelistedChannel> findByChannelIdAndGuild_GuildId(final long channelId, final long guildId);
+
+	boolean existsByChannelIdAndGuild_GuildId(final long channelId, final long guildId);
 }

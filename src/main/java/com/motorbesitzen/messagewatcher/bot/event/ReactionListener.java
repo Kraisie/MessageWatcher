@@ -5,10 +5,7 @@ import com.motorbesitzen.messagewatcher.data.dao.DiscordGuild;
 import com.motorbesitzen.messagewatcher.data.dao.DiscordMember;
 import com.motorbesitzen.messagewatcher.data.dao.MessageVerification;
 import com.motorbesitzen.messagewatcher.data.dao.ModRole;
-import com.motorbesitzen.messagewatcher.data.repo.DiscordGuildRepo;
-import com.motorbesitzen.messagewatcher.data.repo.DiscordMemberRepo;
-import com.motorbesitzen.messagewatcher.data.repo.MessageVerificationRepo;
-import com.motorbesitzen.messagewatcher.data.repo.ModRoleRepo;
+import com.motorbesitzen.messagewatcher.data.repo.*;
 import com.motorbesitzen.messagewatcher.util.LogUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -30,14 +27,16 @@ public class ReactionListener extends ListenerAdapter {
 	private final DiscordMemberRepo memberRepo;
 	private final ModRoleRepo roleRepo;
 	private final MessageVerificationRepo verificationRepo;
+	private final WhitelistedChannelRepo whitelistedChannelRepo;
 
 	@Autowired
 	ReactionListener(final DiscordGuildRepo guildRepo, final DiscordMemberRepo memberRepo, final ModRoleRepo roleRepo,
-					 final MessageVerificationRepo verificationRepo) {
+					 final MessageVerificationRepo verificationRepo, final WhitelistedChannelRepo whitelistedChannelRepo) {
 		this.guildRepo = guildRepo;
 		this.memberRepo = memberRepo;
 		this.roleRepo = roleRepo;
 		this.verificationRepo = verificationRepo;
+		this.whitelistedChannelRepo = whitelistedChannelRepo;
 	}
 
 	@Override
@@ -64,6 +63,12 @@ public class ReactionListener extends ListenerAdapter {
 			}
 
 			handleVerification(event, message, messageVerificationOpt.get());
+			return;
+		}
+
+		final TextChannel channel = message.getTextChannel();
+		if (whitelistedChannelRepo.existsByChannelIdAndGuild_GuildId(channel.getIdLong(), guildId)) {
+			// ignore reports in whitelisted channels
 			return;
 		}
 
