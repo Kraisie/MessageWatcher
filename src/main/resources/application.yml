@@ -59,9 +59,6 @@ spring:
     console:
       enabled: true
       path: /h2
-  datasource:
-    initialization-mode: always # always import data
-    data: classpath:/data.sql   # location with the sample data to import
 # logging for hibernate activities
 logging:
   level:
